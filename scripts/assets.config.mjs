@@ -6,7 +6,7 @@
 //   size       Größe, in der die KI generiert: 1024x1024, 1536x1024 (quer), 1024x1536 (hoch)
 //   background 'transparent' für Figuren und Objekte, sonst 'opaque'
 //   pixelWidth Breite der fertigen Pixel-Grafik; kleiner = gröbere Pixel.
-//              Bei Möbeln bestimmt das auch die Größe im Raum (Maßstab: Tür ≈ 165 Pixel hoch)
+//              Bei Möbeln bestimmt das auch die Größe im Raum (Maßstab: Tür in room-wall)
 //   colors     maximale Farbanzahl nach der Aufbereitung
 //   reference  optional: id eines schon erzeugten Assets als Stilvorlage
 
@@ -16,6 +16,12 @@ export const STYLE =
   'slightly top-down three-quarter view, dark outlines, colorful and varied palette with many distinct hues ' +
   '(greens, blues, reds, yellows, purples) on a cozy evening base of deep night blues with warm lamp light ' +
   'and a few neon pink accents, subtle Berlin flair, charming and a little humorous.';
+
+// Feste Ansicht für Innenraum und Möbel, damit alles zusammenpasst
+const ROOM_VIEW =
+  'Orthographic Stardew Valley style view: no perspective, no vanishing point, all horizontal lines perfectly ' +
+  'horizontal and all vertical lines perfectly vertical. Objects are seen straight from the front and slightly from ' +
+  'above, so only the flat front face and a thin strip of the top face are visible, never any side face.';
 
 export const ASSETS = [
   {
@@ -73,70 +79,78 @@ export const ASSETS = [
     colors: 64,
     reference: 'shop-interior',
   },
-  // Ausbaubarer Innenraum: leerer Raum als Hintergrund, Möbel als Einzelteile zum Platzieren
+  // Ausbaubarer Innenraum aus Teilen: flache Rückwand + Bodenfliese (Raster legt der Code) + Möbel einzeln
   {
-    id: 'room-empty',
+    id: 'room-wall',
     prompt:
-      'Wide empty interior of a small Berlin "Späti" late-night kiosk, straight-on front view seen from slightly above ' +
-      'like a room in Stardew Valley: the back wall runs perfectly horizontal and parallel to the image edge, ' +
-      'no side walls visible, no corner view, no angled walls, no vanishing point to the side. Below it a large empty rectangular floor with ' +
-      'a straight square tile grid seen from above. Only the bare room: back wall with a shop window on the left ' +
-      'showing the evening street and an entrance door on the right, two hanging lamps. The room is bright and well lit by warm ceiling lamps and fluorescent light: ' +
-      'light painted walls with some exposed light brick, light warm floor tiles, friendly and inviting. ' +
-      'Dark night blue only outside the window, not inside. Completely empty: no furniture, no fridges, no shelves, no counter, no goods, ' +
-      'no characters, no text. Lots of free floor and wall space to place furniture later.',
+      'Flat front elevation of the inside back wall of a small Berlin "Späti" late-night kiosk, seen perfectly ' +
+      'straight on like a theater backdrop: the wall fills the entire image edge to edge, no floor, no ceiling, ' +
+      'no side walls, no corners, no perspective. On the wall: a large shop window on the left showing the evening ' +
+      'street, an entrance door on the right standing on the bottom edge of the image, two hanging lamps at the top. ' +
+      'Light painted plaster with some exposed light brick, a dark skirting board along the bottom edge, bright and ' +
+      'well lit, friendly and inviting. Dark night blue only outside the window. No furniture, no goods, no characters, no text.',
     size: '1536x1024',
     background: 'opaque',
-    pixelWidth: 512,
+    pixelWidth: 384,
     colors: 64,
-    // ohne Stilvorlage: das alte Innenraum-Bild zieht sonst die Eck-Perspektive mit hinein
+  },
+  {
+    id: 'floor-tile',
+    prompt:
+      'A single square floor tile seen exactly from above, filling the whole image edge to edge: light warm ' +
+      'terracotta shop floor tile with a thin darker grout line along its edges and a little subtle texture. ' +
+      'Flat, no perspective, no shadows, no objects, no text.',
+    size: '1024x1024',
+    background: 'opaque',
+    pixelWidth: 24,
+    colors: 12,
   },
   {
     id: 'furn-fridge',
     prompt:
-      'Single piece of shop furniture as a game object sprite, slightly top-down three-quarter view matching a ' +
-      'simulation game room: a tall glass-door drink fridge full of colorful bottles (green beer, yellow mate, red and blue cans), glowing from inside, a few stickers on the side. ' +
+      ROOM_VIEW + ' Single piece of shop furniture as a game object sprite, drawn as a strict front elevation ' +
+      'with only a thin strip of its top visible and absolutely no side faces: a tall glass-door drink fridge full of colorful bottles (green beer, yellow mate, red and blue cans), glowing from inside, a few stickers on its front frame. ' +
       'Centered, whole object visible, no floor, no shadow on the background, transparent background, no text.',
     size: '1024x1024',
     background: 'transparent',
     pixelWidth: 160,
     colors: 32,
-    reference: 'shop-interior',
+    reference: 'room-wall',
   },
   {
     id: 'furn-counter',
     prompt:
-      'Single piece of shop furniture as a game object sprite, slightly top-down three-quarter view matching a ' +
-      'simulation game room: a wooden shop counter with an old grey cash register on top. ' +
+      ROOM_VIEW + ' Single piece of shop furniture as a game object sprite, drawn as a strict front elevation ' +
+      'with only a thin strip of its top visible and absolutely no side faces: a wooden shop counter with an old grey cash register on top. ' +
       'Centered, whole object visible, no floor, no shadow on the background, transparent background, no text.',
     size: '1024x1024',
     background: 'transparent',
     pixelWidth: 176,
     colors: 32,
-    reference: 'shop-interior',
+    reference: 'room-wall',
   },
   {
     id: 'furn-snackshelf',
     prompt:
-      'Single piece of shop furniture as a game object sprite, slightly top-down three-quarter view matching a ' +
-      'simulation game room: a wooden snack shelf with three tiers of colorful chip bags and candy packages. ' +
+      ROOM_VIEW + ' Single piece of shop furniture as a game object sprite, drawn as a strict front elevation ' +
+      'with only a thin strip of its top visible and absolutely no side faces: a wooden snack shelf with three tiers of colorful chip bags and candy packages. ' +
       'Centered, whole object visible, no floor, no shadow on the background, transparent background, no text.',
     size: '1024x1024',
     background: 'transparent',
     pixelWidth: 128,
     colors: 32,
-    reference: 'shop-interior',
+    reference: 'room-wall',
   },
   {
     id: 'furn-crate',
     prompt:
-      'Single piece of shop furniture as a game object sprite, slightly top-down three-quarter view matching a ' +
-      'simulation game room: a blue plastic crate full of empty brown deposit beer bottles. ' +
+      ROOM_VIEW + ' Single piece of shop furniture as a game object sprite, drawn as a strict front elevation ' +
+      'with only a thin strip of its top visible and absolutely no side faces: a blue plastic crate full of empty brown deposit beer bottles. ' +
       'Centered, whole object visible, no floor, no shadow on the background, transparent background, no text.',
     size: '1024x1024',
     background: 'transparent',
     pixelWidth: 64,
     colors: 32,
-    reference: 'shop-interior',
+    reference: 'room-wall',
   },
 ];
