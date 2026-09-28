@@ -27,9 +27,13 @@ Alle Pixel-Assets werden per KI erzeugt und automatisch auf ein echtes Pixelrast
 Die Liste steht in `scripts/assets.config.mjs`.
 
 ```bash
-npm run assets                 # fehlende Assets erzeugen
-npm run assets -- char-raver   # ein bestimmtes Asset neu erzeugen
-npm run assets -- --pixel      # nur aus vorhandenen Rohbildern neu herunterrechnen (ohne API)
+npm run assets                      # zeigt fehlende Assets und geschätzte Kosten, generiert nichts
+npm run assets -- --ja              # fehlende Assets wirklich erzeugen (kostet Geld)
+npm run assets -- char-raver --ja   # ein bestimmtes Asset neu erzeugen
+npm run assets -- --pixel           # nur aus vorhandenen Rohbildern neu herunterrechnen (ohne API)
 ```
+
+Standard-Qualität ist `low`, weil die Bilder ohnehin auf Pixelgröße verkleinert werden.
+Mehrere Grafiken möglichst als Sammelblatt (`split`) anlegen: ein Bild statt vieler.
 
 Braucht `OPENAI_API_KEY` als Umgebungsvariable und Netzwerkzugriff auf `api.openai.com`.

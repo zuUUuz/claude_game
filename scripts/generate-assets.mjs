@@ -1,10 +1,14 @@
 // Erzeugt Pixel-Assets über die OpenAI-Bild-API und bereitet sie als echte Pixel-Grafik auf.
 //
 // Aufruf:
-//   npm run assets                 alle fehlenden Assets erzeugen
-//   npm run assets -- char-raver   nur bestimmte Assets (auch wenn sie schon existieren)
-//   npm run assets -- --force      alle neu erzeugen
+//   npm run assets                 zeigt, welche fehlenden Assets erzeugt würden und was das etwa kostet
+//   npm run assets -- --ja         ... und erzeugt sie dann wirklich (kostet Geld)
+//   npm run assets -- char-raver   nur bestimmte Assets (auch wenn sie schon existieren), ebenfalls mit --ja
+//   npm run assets -- --force      alle neu erzeugen, ebenfalls mit --ja
 //   npm run assets -- --pixel      nur aus vorhandenen Rohbildern neu herunterrechnen (kostet nichts)
+//
+// Qualität: Standard ist 'low', weil die Bilder ohnehin stark verkleinert werden. Pro Asset mit
+// quality: 'medium' | 'high' überschreibbar, oder für alle mit der Umgebungsvariable OPENAI_IMAGE_QUALITY.
 //
 // Braucht die Umgebungsvariable OPENAI_API_KEY und Netzwerkzugriff auf api.openai.com.
 // Rohbilder landen in assets/raw/, fertige Pixel-Grafik in assets/.
@@ -15,18 +19,25 @@ import sharp from 'sharp';
 import { ASSETS, STYLE } from './assets.config.mjs';
 
 const MODEL = process.env.OPENAI_IMAGE_MODEL || 'gpt-image-1';
+const QUALITY = process.env.OPENAI_IMAGE_QUALITY || 'low';
+
+// Ungefähre Preise in US-Dollar pro Bild für gpt-image-1 (ohne Aufschlag für Stilvorlagen), nur zur Orientierung
+const PRICE = {
+  low: { square: 0.011, wide: 0.016 },
+  medium: { square: 0.042, wide: 0.063 },
+  high: { square: 0.167, wide: 0.25 },
+};
+const qualityOf = asset => asset.quality || QUALITY;
+const priceOf = asset => PRICE[qualityOf(asset)]?.[asset.size === '1024x1024' ? 'square' : 'wide'] ?? 0;
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const RAW = path.join(ROOT, 'assets', 'raw');
 const OUT = path.join(ROOT, 'assets');
 
 const key = process.env.OPENAI_API_KEY;
-if (!key) {
-  console.error('OPENAI_API_KEY fehlt. In den Umgebungs-Einstellungen als Variable anlegen und eine neue Session starten.');
-  process.exit(1);
-}
 
 const args = process.argv.slice(2);
 const force = args.includes('--force');
+const confirmed = args.includes('--ja');
 const pixelOnly = args.includes('--pixel');
 const only = args.filter(a => !a.startsWith('--'));
 
@@ -42,7 +53,7 @@ async function generate(asset) {
     form.append('model', MODEL);
     form.append('prompt', `Use the attached image only as the style reference (palette, pixel size, outlines). ${prompt}`);
     form.append('size', asset.size);
-    form.append('quality', 'high');
+    form.append('quality', qualityOf(asset));
     form.append('background', asset.background);
     form.append('image[]', new Blob([await fs.readFile(refPath)], { type: 'image/png' }), 'reference.png');
     res = await fetch('https://api.openai.com/v1/images/edits', { method: 'POST', headers: { Authorization: `Bearer ${key}` }, body: form });
@@ -50,7 +61,7 @@ async function generate(asset) {
     res = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: MODEL, prompt, size: asset.size, quality: 'high', background: asset.background, n: 1 }),
+      body: JSON.stringify({ model: MODEL, prompt, size: asset.size, quality: qualityOf(asset), background: asset.background, n: 1 }),
     });
   }
   if (!res.ok) throw new Error(`API-Fehler ${res.status}: ${await res.text()}`);
@@ -108,18 +119,40 @@ async function save(asset, raw) {
   return `assets/${asset.id}.png + ${parts.map(p => p.id).join(', ')}`;
 }
 
-for (const asset of list) {
-  const rawPath = path.join(RAW, `${asset.id}.png`);
-  const outPath = path.join(OUT, `${asset.id}.png`);
-  if (pixelOnly) {
+if (pixelOnly) {
+  for (const asset of list) {
+    const rawPath = path.join(RAW, `${asset.id}.png`);
     if (!await exists(rawPath)) { console.log(`= ${asset.id} hat kein Rohbild`); continue; }
     console.log(`↻ ${await save(asset, await fs.readFile(rawPath))}`);
-    continue;
   }
-  if (!force && !only.length && await exists(outPath)) { console.log(`= ${asset.id} existiert schon`); continue; }
-  process.stdout.write(`… ${asset.id} wird generiert (${asset.size}) `);
+  console.log('Fertig.');
+  process.exit(0);
+}
+
+// Erst zeigen, was generiert würde und was es etwa kostet; generiert wird nur mit --ja
+const todo = [];
+for (const asset of list) {
+  if (!force && !only.length && await exists(path.join(OUT, `${asset.id}.png`))) continue;
+  todo.push(asset);
+}
+if (!todo.length) { console.log('Nichts zu tun, alle Assets existieren schon.'); process.exit(0); }
+const total = todo.reduce((sum, a) => sum + priceOf(a), 0);
+console.log(`${todo.length} Bild(er), Modell ${MODEL}:`);
+for (const a of todo) console.log(`  ${a.id.padEnd(16)} ${a.size.padEnd(10)} ${qualityOf(a).padEnd(7)} ca. ${priceOf(a).toFixed(3)} $`);
+console.log(`Geschätzt zusammen: ca. ${total.toFixed(2)} $ (Stilvorlagen kosten etwas mehr)`);
+if (!confirmed) {
+  console.log('Noch nichts generiert. Zum Ausführen denselben Befehl mit --ja starten.');
+  process.exit(0);
+}
+if (!key) {
+  console.error('OPENAI_API_KEY fehlt. In den Umgebungs-Einstellungen als Variable anlegen und eine neue Session starten.');
+  process.exit(1);
+}
+
+for (const asset of todo) {
+  process.stdout.write(`… ${asset.id} wird generiert (${asset.size}, ${qualityOf(asset)}) `);
   const raw = await generate(asset);
-  await fs.writeFile(rawPath, raw);
+  await fs.writeFile(path.join(RAW, `${asset.id}.png`), raw);
   console.log(`→ ${await save(asset, raw)}`);
 }
 console.log('Fertig.');

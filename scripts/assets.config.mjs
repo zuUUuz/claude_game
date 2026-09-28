@@ -12,6 +12,7 @@
 //   colors     maximale Farbanzahl nach der Aufbereitung
 //   split      optional: Blatt in { cols, rows, parts: [{ id, pixelWidth }] } zerschneiden; jedes Teil wird
 //              aus dem Rohbild auf seine eigene Breite gerechnet und als eigene Datei gespeichert
+//   quality    optional: 'low' (Standard, am günstigsten), 'medium' oder 'high'
 //   reference  optional: id eines schon erzeugten Assets als Stilvorlage
 
 // Einheitlicher Stil für alle Bilder
