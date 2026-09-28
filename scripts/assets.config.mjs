@@ -77,10 +77,11 @@ export const ASSETS = [
   {
     id: 'room-empty',
     prompt:
-      'Wide empty interior of a small Berlin "Späti" late-night kiosk, seen from slightly above in three-quarter view ' +
-      'so a large empty floor is visible, like an empty room at the start of a simulation game. Only the bare room: ' +
-      'back wall, simple tiled floor, a shop window on the left showing the evening street, an entrance door on ' +
-      'the right, two hanging lamps. The room is bright and well lit by warm ceiling lamps and fluorescent light: ' +
+      'Wide empty interior of a small Berlin "Späti" late-night kiosk, straight-on front view seen from slightly above ' +
+      'like a room in Stardew Valley: the back wall runs perfectly horizontal and parallel to the image edge, ' +
+      'no side walls visible, no corner view, no angled walls, no vanishing point to the side. Below it a large empty rectangular floor with ' +
+      'a straight square tile grid seen from above. Only the bare room: back wall with a shop window on the left ' +
+      'showing the evening street and an entrance door on the right, two hanging lamps. The room is bright and well lit by warm ceiling lamps and fluorescent light: ' +
       'light painted walls with some exposed light brick, light warm floor tiles, friendly and inviting. ' +
       'Dark night blue only outside the window, not inside. Completely empty: no furniture, no fridges, no shelves, no counter, no goods, ' +
       'no characters, no text. Lots of free floor and wall space to place furniture later.',
@@ -88,7 +89,7 @@ export const ASSETS = [
     background: 'opaque',
     pixelWidth: 512,
     colors: 64,
-    reference: 'shop-interior',
+    // ohne Stilvorlage: das alte Innenraum-Bild zieht sonst die Eck-Perspektive mit hinein
   },
   {
     id: 'furn-fridge',
