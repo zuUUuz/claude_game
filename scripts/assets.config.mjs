@@ -10,6 +10,8 @@
 //   pixelHeight optional: feste Höhe (staucht das Bild, z. B. Boden für Tiefenwirkung)
 //   crop       optional: Ausschnitt aus dem Rohbild { left, top, width, height }
 //   colors     maximale Farbanzahl nach der Aufbereitung
+//   split      optional: Blatt in { cols, rows, parts: [{ id, pixelWidth }] } zerschneiden; jedes Teil wird
+//              aus dem Rohbild auf seine eigene Breite gerechnet und als eigene Datei gespeichert
 //   reference  optional: id eines schon erzeugten Assets als Stilvorlage
 
 // Einheitlicher Stil für alle Bilder
@@ -99,9 +101,10 @@ export const ASSETS = [
   {
     id: 'room-floor',
     prompt:
-      'Seamless floor surface of a small Berlin late-night kiosk, seen from above, filling the whole image edge to edge: ' +
-      'worn warm beige-brown linoleum with a few scuff marks, faint stains and subtle wear paths, no tiles, no grid, ' +
-      'no seams, no lines. Slightly darker toward the top edge. No objects, no shadows of objects, no text.',
+      'Seamless floor surface of a small Berlin late-night kiosk, seen from above, filling the whole image edge to edge ' +
+      'with no border and no edges: light warm beige linoleum with a subtle fine speckle pattern of tiny darker and ' +
+      'lighter flecks, some gentle scuff marks and a few faint worn paths. Calm and not too busy, no large spots. ' +
+      'No tiles, no grid, no seams, no lines, even lighting. No objects, no shadows of objects, no text.',
     size: '1536x1024',
     background: 'opaque',
     pixelWidth: 384,
@@ -110,52 +113,33 @@ export const ASSETS = [
     colors: 24,
     reference: 'room-wall',
   },
+  // Alle Möbel auf einem Blatt, damit Blickwinkel und Maßstab einheitlich sind; das Skript schneidet sie auseinander
   {
-    id: 'furn-fridge',
+    id: 'furniture',
     prompt:
-      ROOM_VIEW + ' Single piece of shop furniture as a game object sprite, drawn as a strict front elevation ' +
-      'with only a thin strip of its top visible and absolutely no side faces: a tall glass-door drink fridge full of colorful bottles (green beer, yellow mate, red and blue cans), glowing from inside, a few stickers on its front frame. ' +
-      'Centered, whole object visible, no floor, no shadow on the background, transparent background, no text.',
+      ROOM_VIEW + ' Sprite sheet of 4 pieces of shop furniture for the same game, arranged in a 2x2 grid with lots of ' +
+      'empty space between them, every piece drawn from exactly the same camera angle: strict front view, only a thin ' +
+      'strip of each top visible, absolutely no side faces, not rotated. All drawn at the same real-world scale: ' +
+      'top left a tall glass-door drink fridge (tallest piece, taller than a person) full of colorful bottles (green beer, ' +
+      'yellow mate, red and blue cans), glowing from inside, a few stickers on its front frame; ' +
+      'top right a waist-high wooden shop counter with an old grey cash register on top; ' +
+      'bottom left a chest-high wooden snack shelf with three tiers of colorful chip bags and candy packages; ' +
+      'bottom right a small knee-high blue plastic crate full of empty brown deposit beer bottles. ' +
+      'Each piece standing upright on its own, no floor, no shadows, transparent background, no text.',
     size: '1024x1024',
     background: 'transparent',
-    pixelWidth: 160,
-    colors: 32,
+    pixelWidth: 384,
+    colors: 48,
     reference: 'room-wall',
-  },
-  {
-    id: 'furn-counter',
-    prompt:
-      ROOM_VIEW + ' Single piece of shop furniture as a game object sprite, drawn as a strict front elevation ' +
-      'with only a thin strip of its top visible and absolutely no side faces: a wooden shop counter with an old grey cash register on top. ' +
-      'Centered, whole object visible, no floor, no shadow on the background, transparent background, no text.',
-    size: '1024x1024',
-    background: 'transparent',
-    pixelWidth: 176,
-    colors: 32,
-    reference: 'room-wall',
-  },
-  {
-    id: 'furn-snackshelf',
-    prompt:
-      ROOM_VIEW + ' Single piece of shop furniture as a game object sprite, drawn as a strict front elevation ' +
-      'with only a thin strip of its top visible and absolutely no side faces: a wooden snack shelf with three tiers of colorful chip bags and candy packages. ' +
-      'Centered, whole object visible, no floor, no shadow on the background, transparent background, no text.',
-    size: '1024x1024',
-    background: 'transparent',
-    pixelWidth: 128,
-    colors: 32,
-    reference: 'room-wall',
-  },
-  {
-    id: 'furn-crate',
-    prompt:
-      ROOM_VIEW + ' Single piece of shop furniture as a game object sprite, drawn as a strict front elevation ' +
-      'with only a thin strip of its top visible and absolutely no side faces: a blue plastic crate full of empty brown deposit beer bottles. ' +
-      'Centered, whole object visible, no floor, no shadow on the background, transparent background, no text.',
-    size: '1024x1024',
-    background: 'transparent',
-    pixelWidth: 64,
-    colors: 32,
-    reference: 'room-wall',
+    split: {
+      cols: 2, rows: 2,
+      // Breite der fertigen Teile = Größe im Raum (Tür in room-wall ist etwa 150 Pixel hoch)
+      parts: [
+        { id: 'furn-fridge', pixelWidth: 88 },
+        { id: 'furn-counter', pixelWidth: 132 },
+        { id: 'furn-snackshelf', pixelWidth: 96 },
+        { id: 'furn-crate', pixelWidth: 44 },
+      ],
+    },
   },
 ];

@@ -80,20 +80,35 @@ if (only.length && list.length !== only.length) {
   process.exit(1);
 }
 
+// Fertige Pixel-Grafik speichern; Sammelblätter werden in einzelne Teile zerlegt,
+// jedes Teil aus dem Rohbild zugeschnitten und auf seine eigene Breite gerechnet
+async function save(asset, raw) {
+  await fs.writeFile(path.join(OUT, `${asset.id}.png`), await pixelate(raw, asset));
+  if (!asset.split) return `assets/${asset.id}.png`;
+  const { cols, rows, parts } = asset.split;
+  const { width, height } = await sharp(raw).metadata();
+  const w = Math.floor(width / cols), h = Math.floor(height / rows);
+  for (const [i, part] of parts.entries()) {
+    const m = Math.round(w * 0.04); // kleiner Rand weg, damit nichts vom Nachbarteil mitkommt
+    const cell = await sharp(raw).extract({ left: (i % cols) * w + m, top: Math.floor(i / cols) * h + m, width: w - 2 * m, height: h - 2 * m }).png().toBuffer();
+    const trimmed = await sharp(cell).trim().png().toBuffer();
+    await fs.writeFile(path.join(OUT, `${part.id}.png`), await pixelate(trimmed, { ...asset, pixelWidth: part.pixelWidth }));
+  }
+  return `assets/${asset.id}.png + ${parts.map(p => p.id).join(', ')}`;
+}
+
 for (const asset of list) {
   const rawPath = path.join(RAW, `${asset.id}.png`);
   const outPath = path.join(OUT, `${asset.id}.png`);
   if (pixelOnly) {
     if (!await exists(rawPath)) { console.log(`= ${asset.id} hat kein Rohbild`); continue; }
-    await fs.writeFile(outPath, await pixelate(await fs.readFile(rawPath), asset));
-    console.log(`↻ assets/${asset.id}.png`);
+    console.log(`↻ ${await save(asset, await fs.readFile(rawPath))}`);
     continue;
   }
   if (!force && !only.length && await exists(outPath)) { console.log(`= ${asset.id} existiert schon`); continue; }
   process.stdout.write(`… ${asset.id} wird generiert (${asset.size}) `);
   const raw = await generate(asset);
   await fs.writeFile(rawPath, raw);
-  await fs.writeFile(outPath, await pixelate(raw, asset));
-  console.log(`→ assets/${asset.id}.png`);
+  console.log(`→ ${await save(asset, raw)}`);
 }
 console.log('Fertig.');
