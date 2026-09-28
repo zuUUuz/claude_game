@@ -70,6 +70,16 @@ async function pixelate(raw, asset) {
   if (asset.background !== 'transparent') return small;
   const { data, info } = await sharp(small).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   for (let i = 3; i < data.length; i += 4) data[i] = data[i] < 128 ? 0 : 255;
+  // Verirrte Einzelpixel entfernen (weniger als 2 deckende Nachbarn)
+  const { width: w, height: h } = info, a = (x, y) => x >= 0 && y >= 0 && x < w && y < h && data[(y * w + x) * 4 + 3] > 0;
+  const stray = [];
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (!a(x, y)) continue;
+    let n = 0;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if ((dx || dy) && a(x + dx, y + dy)) n++;
+    if (n < 2) stray.push((y * w + x) * 4 + 3);
+  }
+  for (const i of stray) data[i] = 0;
   return sharp(data, { raw: info }).png({ palette: true, colors: asset.colors, dither: 0 }).toBuffer();
 }
 
@@ -92,7 +102,8 @@ async function save(asset, raw) {
     const m = Math.round(w * 0.04); // kleiner Rand weg, damit nichts vom Nachbarteil mitkommt
     const cell = await sharp(raw).extract({ left: (i % cols) * w + m, top: Math.floor(i / cols) * h + m, width: w - 2 * m, height: h - 2 * m }).png().toBuffer();
     const trimmed = await sharp(cell).trim().png().toBuffer();
-    await fs.writeFile(path.join(OUT, `${part.id}.png`), await pixelate(trimmed, { ...asset, pixelWidth: part.pixelWidth }));
+    const small = await pixelate(trimmed, { ...asset, pixelWidth: part.pixelWidth });
+    await fs.writeFile(path.join(OUT, `${part.id}.png`), await sharp(small).trim().png({ palette: true, colors: asset.colors, dither: 0 }).toBuffer());
   }
   return `assets/${asset.id}.png + ${parts.map(p => p.id).join(', ')}`;
 }

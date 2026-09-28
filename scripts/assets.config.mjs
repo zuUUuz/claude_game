@@ -138,7 +138,7 @@ export const ASSETS = [
         { id: 'furn-fridge', pixelWidth: 88 },
         { id: 'furn-counter', pixelWidth: 132 },
         { id: 'furn-snackshelf', pixelWidth: 96 },
-        { id: 'furn-crate', pixelWidth: 44 },
+        { id: 'furn-crate', pixelWidth: 72 },
       ],
     },
   },
