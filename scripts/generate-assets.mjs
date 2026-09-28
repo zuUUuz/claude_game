@@ -60,9 +60,10 @@ async function generate(asset) {
 
 // Auf ein echtes Pixelraster herunterrechnen und die Farben begrenzen
 async function pixelate(raw, asset) {
+  if (asset.crop) raw = await sharp(raw).extract(asset.crop).toBuffer();
   const meta = await sharp(raw).metadata();
-  const height = Math.round(meta.height * asset.pixelWidth / meta.width);
-  let img = sharp(raw).resize(asset.pixelWidth, height, { kernel: 'nearest' });
+  const height = asset.pixelHeight || Math.round(meta.height * asset.pixelWidth / meta.width);
+  let img = sharp(raw).resize(asset.pixelWidth, height, { kernel: 'nearest', fit: 'fill' });
   if (asset.background === 'transparent') img = img.ensureAlpha();
   const small = await img.png({ palette: true, colors: asset.colors, dither: 0 }).toBuffer();
   // Halbtransparente Kantenpixel hart machen, damit die Figuren sauber freigestellt sind

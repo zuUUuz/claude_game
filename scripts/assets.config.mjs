@@ -7,6 +7,8 @@
 //   background 'transparent' für Figuren und Objekte, sonst 'opaque'
 //   pixelWidth Breite der fertigen Pixel-Grafik; kleiner = gröbere Pixel.
 //              Bei Möbeln bestimmt das auch die Größe im Raum (Maßstab: Tür in room-wall)
+//   pixelHeight optional: feste Höhe (staucht das Bild, z. B. Boden für Tiefenwirkung)
+//   crop       optional: Ausschnitt aus dem Rohbild { left, top, width, height }
 //   colors     maximale Farbanzahl nach der Aufbereitung
 //   reference  optional: id eines schon erzeugten Assets als Stilvorlage
 
@@ -79,7 +81,7 @@ export const ASSETS = [
     colors: 64,
     reference: 'shop-interior',
   },
-  // Ausbaubarer Innenraum aus Teilen: flache Rückwand + Bodenfliese (Raster legt der Code) + Möbel einzeln
+  // Ausbaubarer Innenraum aus Teilen: flache Rückwand + Bodenfliese (Bau-Raster nur im Baumodus) + Möbel einzeln
   {
     id: 'room-wall',
     prompt:
@@ -95,15 +97,18 @@ export const ASSETS = [
     colors: 64,
   },
   {
-    id: 'floor-tile',
+    id: 'room-floor',
     prompt:
-      'A single square floor tile seen exactly from above, filling the whole image edge to edge: light warm ' +
-      'terracotta shop floor tile with a thin darker grout line along its edges and a little subtle texture. ' +
-      'Flat, no perspective, no shadows, no objects, no text.',
-    size: '1024x1024',
+      'Seamless floor surface of a small Berlin late-night kiosk, seen from above, filling the whole image edge to edge: ' +
+      'worn warm beige-brown linoleum with a few scuff marks, faint stains and subtle wear paths, no tiles, no grid, ' +
+      'no seams, no lines. Slightly darker toward the top edge. No objects, no shadows of objects, no text.',
+    size: '1536x1024',
     background: 'opaque',
-    pixelWidth: 24,
-    colors: 12,
+    pixelWidth: 384,
+    pixelHeight: 144,
+    crop: { left: 400, top: 300, width: 736, height: 400 }, // nur die Mitte, ohne den schrägen Rand
+    colors: 24,
+    reference: 'room-wall',
   },
   {
     id: 'furn-fridge',
