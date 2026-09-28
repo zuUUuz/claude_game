@@ -56,19 +56,32 @@ function footShadow(ctx: CanvasRenderingContext2D, cx: number, footY: number, wi
   }
 }
 
-export async function renderRoom(canvas: HTMLCanvasElement, layout: Placed[] = START_LAYOUT) {
+// Boden bis zur gewünschten Höhe fortsetzen, abwechselnd gespiegelt, damit keine Nähte sichtbar sind
+function drawFloor(ctx: CanvasRenderingContext2D, floor: HTMLImageElement, top: number, height: number) {
+  for (let y = 0, i = 0; y < height; y += floor.height, i++) {
+    if (i % 2 === 0) { ctx.drawImage(floor, 0, top + y); continue; }
+    ctx.save();
+    ctx.translate(0, top + y + floor.height);
+    ctx.scale(1, -1);
+    ctx.drawImage(floor, 0, 0);
+    ctx.restore();
+  }
+}
+
+// Zeichnet den Raum; minHeight streckt den Boden nach unten, damit der Raum den ganzen Bildschirm füllt
+export async function renderRoom(canvas: HTMLCanvasElement, minHeight = 0, layout: Placed[] = START_LAYOUT) {
   const [wall, floor] = await Promise.all([loadImage(wallUrl), loadImage(floorUrl)]);
   const types = [...new Set(layout.map(p => p.type))];
   const sprites = Object.fromEntries(await Promise.all(types.map(async t => [t, await loadImage(FURNITURE[t])] as const)));
 
   const wallH = Math.round(wall.height * WALL_CROP);
   canvas.width = wall.width;
-  canvas.height = wallH + floor.height;
+  canvas.height = Math.max(wallH + floor.height, minHeight);
   const ctx = canvas.getContext('2d')!;
   ctx.imageSmoothingEnabled = false;
 
   ctx.drawImage(wall, 0, 0, wall.width, wallH, 0, 0, wall.width, wallH);
-  ctx.drawImage(floor, 0, wallH);
+  drawFloor(ctx, floor, wallH, canvas.height - wallH);
   shadeBand(ctx, wallH, canvas.width, 10, 0.45);
 
   // Von hinten nach vorn zeichnen, damit Vorderes Hinteres verdeckt

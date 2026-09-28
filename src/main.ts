@@ -17,33 +17,21 @@ $('btn-settings').addEventListener('click', () => show('settings'));
 $('btn-debug').addEventListener('click', () => show('debug'));
 document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => show('menu')));
 
-// ---------- Späti: Raum anzeigen, seitlich wischen ----------
+// ---------- Späti: Raum füllt den ganzen Bildschirm ----------
 const room = $('room') as HTMLCanvasElement;
 const roomScroll = $('room-scroll');
-let roomReady: Promise<void> | null = null;
 
-// Größte Vergrößerung, bei der ein Bildschirm breit Raum und die ganze Höhe passen.
-// Gerechnet in echten Gerätepixeln, damit die Bildpixel möglichst gleich groß und scharf bleiben.
-function fitRoom() {
-  if (!room.height) return;
-  const dpr = window.devicePixelRatio || 1;
-  const fitW = (roomScroll.clientWidth * dpr) / SCREEN_WIDTH;
-  const fitH = (roomScroll.clientHeight * dpr) / room.height;
-  const fit = Math.min(fitW, fitH);
-  // Ganzzahlig, solange das mindestens 90 % füllt; sonst exakt einpassen (bei hoher Pixeldichte kaum sichtbar)
-  const scale = (Math.floor(fit) >= fit * 0.9 ? Math.max(1, Math.floor(fit)) : fit) / dpr;
+// Vergrößerung so, dass ein Bildschirm breit Raum genau die Breite füllt; der Boden reicht bis ganz unten.
+// Der Faktor ist meist nicht ganzzahlig, bei der hohen Pixeldichte heutiger Handys fällt das aber nicht auf.
+async function openRoom() {
+  const scale = roomScroll.clientWidth / SCREEN_WIDTH;
+  await renderRoom(room, Math.ceil(roomScroll.clientHeight / scale));
   room.style.width = `${room.width * scale}px`;
   room.style.height = `${room.height * scale}px`;
-}
-
-async function openRoom() {
-  roomReady ??= renderRoom(room);
-  await roomReady;
-  fitRoom();
   // Bei einem breiteren Raum (später durch Upgrades) mittig starten
   roomScroll.scrollLeft = (roomScroll.scrollWidth - roomScroll.clientWidth) / 2;
 }
-window.addEventListener('resize', fitRoom);
+window.addEventListener('resize', () => { if (!$('screen-play').hidden) openRoom(); });
 
 // ---------- Einstellungen merken ----------
 const SETTINGS_KEY = 'kiezkoenig-settings';
