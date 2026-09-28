@@ -1,0 +1,90 @@
+// Erzeugt Pixel-Assets über die OpenAI-Bild-API und bereitet sie als echte Pixel-Grafik auf.
+//
+// Aufruf:
+//   npm run assets                 alle fehlenden Assets erzeugen
+//   npm run assets -- char-raver   nur bestimmte Assets (auch wenn sie schon existieren)
+//   npm run assets -- --force      alle neu erzeugen
+//
+// Braucht die Umgebungsvariable OPENAI_API_KEY und Netzwerkzugriff auf api.openai.com.
+// Rohbilder landen in assets/raw/, fertige Pixel-Grafik in assets/.
+
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import sharp from 'sharp';
+import { ASSETS, STYLE } from './assets.config.mjs';
+
+const MODEL = process.env.OPENAI_IMAGE_MODEL || 'gpt-image-1';
+const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const RAW = path.join(ROOT, 'assets', 'raw');
+const OUT = path.join(ROOT, 'assets');
+
+const key = process.env.OPENAI_API_KEY;
+if (!key) {
+  console.error('OPENAI_API_KEY fehlt. In den Umgebungs-Einstellungen als Variable anlegen und eine neue Session starten.');
+  process.exit(1);
+}
+
+const args = process.argv.slice(2);
+const force = args.includes('--force');
+const only = args.filter(a => !a.startsWith('--'));
+
+async function exists(p) { try { await fs.access(p); return true; } catch { return false; } }
+
+async function generate(asset) {
+  const prompt = `${STYLE} ${asset.prompt}`;
+  const refPath = asset.reference ? path.join(RAW, `${asset.reference}.png`) : null;
+  let res;
+  if (refPath && await exists(refPath)) {
+    // Mit Stilvorlage: Bild-Edit-Endpunkt mit dem Referenzbild
+    const form = new FormData();
+    form.append('model', MODEL);
+    form.append('prompt', `Use the attached image only as the style reference (palette, pixel size, outlines). ${prompt}`);
+    form.append('size', asset.size);
+    form.append('quality', 'high');
+    form.append('background', asset.background);
+    form.append('image[]', new Blob([await fs.readFile(refPath)], { type: 'image/png' }), 'reference.png');
+    res = await fetch('https://api.openai.com/v1/images/edits', { method: 'POST', headers: { Authorization: `Bearer ${key}` }, body: form });
+  } else {
+    res = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: MODEL, prompt, size: asset.size, quality: 'high', background: asset.background, n: 1 }),
+    });
+  }
+  if (!res.ok) throw new Error(`API-Fehler ${res.status}: ${await res.text()}`);
+  const json = await res.json();
+  return Buffer.from(json.data[0].b64_json, 'base64');
+}
+
+// Auf ein echtes Pixelraster herunterrechnen und die Farben begrenzen
+async function pixelate(raw, asset) {
+  const meta = await sharp(raw).metadata();
+  const height = Math.round(meta.height * asset.pixelWidth / meta.width);
+  let img = sharp(raw).resize(asset.pixelWidth, height, { kernel: 'nearest' });
+  if (asset.background === 'transparent') img = img.ensureAlpha();
+  const small = await img.png({ palette: true, colors: asset.colors, dither: 0 }).toBuffer();
+  // Halbtransparente Kantenpixel hart machen, damit die Figuren sauber freigestellt sind
+  if (asset.background !== 'transparent') return small;
+  const { data, info } = await sharp(small).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  for (let i = 3; i < data.length; i += 4) data[i] = data[i] < 128 ? 0 : 255;
+  return sharp(data, { raw: info }).png({ palette: true, colors: asset.colors, dither: 0 }).toBuffer();
+}
+
+await fs.mkdir(RAW, { recursive: true });
+const list = only.length ? ASSETS.filter(a => only.includes(a.id)) : ASSETS;
+if (only.length && list.length !== only.length) {
+  console.error(`Unbekannte Asset-IDs. Verfügbar: ${ASSETS.map(a => a.id).join(', ')}`);
+  process.exit(1);
+}
+
+for (const asset of list) {
+  const rawPath = path.join(RAW, `${asset.id}.png`);
+  const outPath = path.join(OUT, `${asset.id}.png`);
+  if (!force && !only.length && await exists(outPath)) { console.log(`= ${asset.id} existiert schon`); continue; }
+  process.stdout.write(`… ${asset.id} wird generiert (${asset.size}) `);
+  const raw = await generate(asset);
+  await fs.writeFile(rawPath, raw);
+  await fs.writeFile(outPath, await pixelate(raw, asset));
+  console.log(`→ assets/${asset.id}.png`);
+}
+console.log('Fertig.');
