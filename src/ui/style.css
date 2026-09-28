@@ -43,5 +43,70 @@ h2 { margin: 0; font-size: 32px; color: var(--neon); }
 .room-scroll { flex: 1; display: flex; align-items: flex-start; overflow-x: auto; overflow-y: hidden; overscroll-behavior: contain; scrollbar-width: none; }
 .room-scroll::-webkit-scrollbar { display: none; }
 #room { display: block; flex: none; margin: 0 auto; image-rendering: pixelated; }
-.hud-back { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 12px); left: 12px; }
 .btn-small { font-size: 16px; padding: 8px 12px; }
+
+/* Menüs im Spiel: Holz und Pappe (Platzhalter im Code, später KI-Grafiken) */
+:root {
+  --wood: #8a5a2b;
+  --wood-light: #a06a35;
+  --wood-dark: #5e3a1a;
+  --wood-edge: #2a1a12;
+  --paper: #e8cf9c;
+  --paper-dark: #c9a86a;
+  --ink: #2a1a12;
+  --warn: #d9412b;
+}
+.wood {
+  background:
+    repeating-linear-gradient(180deg, transparent 0 14px, var(--wood-dark) 14px 16px),
+    repeating-linear-gradient(90deg, var(--wood) 0 38px, var(--wood-light) 38px 40px, var(--wood) 40px 80px);
+  border: 3px solid var(--wood-edge);
+}
+.hud-top {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; align-items: center; gap: 10px;
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) 12px 8px;
+  border-width: 0 0 3px;
+  color: var(--text); font-size: 16px; text-shadow: 2px 2px 0 var(--wood-edge);
+  font-variant-numeric: tabular-nums;
+}
+.stat { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.stat img, .stock-warning img { width: 20px; height: 20px; image-rendering: pixelated; }
+.hud-menu {
+  margin-left: auto; font: 700 15px var(--font); color: var(--ink);
+  background: var(--paper); border: 3px solid var(--wood-edge); padding: 4px 10px;
+  box-shadow: 2px 2px 0 var(--wood-edge); cursor: pointer;
+}
+.stock-warning {
+  position: absolute; left: 12px; top: calc(env(safe-area-inset-top, 0px) + 52px); margin: 0;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--paper); color: var(--warn); border: 3px solid var(--wood-edge);
+  padding: 3px 8px; font-size: 14px; font-weight: 700; box-shadow: 2px 2px 0 var(--wood-edge);
+  transform: rotate(-2deg);
+}
+.hud-bottom {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  padding: 10px 10px calc(env(safe-area-inset-bottom, 0px) + 10px);
+  border-width: 3px 0 0;
+}
+.sign {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font: 700 15px var(--font); color: var(--ink);
+  background: linear-gradient(var(--paper), var(--paper-dark));
+  border: 3px solid var(--wood-edge); padding: 6px 4px 4px;
+  box-shadow: 3px 3px 0 var(--wood-edge); cursor: pointer;
+}
+.sign img { width: 32px; height: 32px; image-rendering: pixelated; }
+.sign:nth-child(odd) { transform: rotate(-1deg); }
+.sign:nth-child(even) { transform: rotate(1deg); }
+.sign:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--wood-edge); }
+.sign:focus-visible, .hud-menu:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+.panel-backdrop { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(11, 9, 17, .6); }
+.panel { width: 100%; max-width: 340px; padding: 14px; display: flex; flex-direction: column; gap: 12px; box-shadow: 6px 6px 0 var(--wood-edge); }
+.panel-paper { background: var(--paper); color: var(--ink); border: 3px solid var(--wood-edge); padding: 14px; }
+.panel-paper h3 { margin: 0 0 8px; font-size: 26px; }
+.panel-paper p { margin: 0; font-size: 17px; }
+.sign-wide { flex-direction: row; justify-content: center; padding: 10px; font-size: 18px; transform: none; }
+@media (prefers-reduced-motion: reduce) { .sign, .stock-warning { transform: none; } }

@@ -1,7 +1,9 @@
 import './ui/style.css';
 import { renderRoom, SCREEN_WIDTH } from './game/room';
+import { state, formatMoney, formatTime } from './game/state';
+import { fillIcons } from './ui/icons';
 
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 const $ = (id: string) => document.getElementById(id)!;
 
 // ---------- Bildschirme wechseln ----------
@@ -10,7 +12,7 @@ type Screen = typeof screens[number];
 function show(name: Screen) {
   screens.forEach(s => { $(`screen-${s}`).hidden = s !== name; });
   if (name === 'debug') renderDebug();
-  if (name === 'play') openRoom();
+  if (name === 'play') { renderHud(); openRoom(); }
 }
 $('btn-play').addEventListener('click', () => show('play'));
 $('btn-settings').addEventListener('click', () => show('settings'));
@@ -32,6 +34,37 @@ async function openRoom() {
   roomScroll.scrollLeft = (roomScroll.scrollWidth - roomScroll.clientWidth) / 2;
 }
 window.addEventListener('resize', () => { if (!$('screen-play').hidden) openRoom(); });
+
+// ---------- Anzeige oben: Geld, Zeit, Beliebtheit, Warnung bei knapper Ware ----------
+function renderHud() {
+  $('hud-money').textContent = formatMoney(state.money);
+  $('hud-time').textContent = `Tag ${state.day} · ${formatTime(state.minutes)}`;
+  $('hud-rating').textContent = `${state.rating}/5`;
+  const warn = $('hud-stock');
+  warn.hidden = state.lowStock.length === 0;
+  warn.querySelector('span')!.textContent = `${state.lowStock.join(', ')} knapp`;
+}
+
+// ---------- Buttons unten: öffnen je ein Panel (Inhalte kommen in späteren Schritten) ----------
+const PANELS: Record<string, { title: string; text: string }> = {
+  lager: { title: 'Lager', text: 'Hier bestellst du Ware und siehst, was noch da ist. Kommt in einem späteren Schritt.' },
+  preise: { title: 'Preise', text: 'Hier legst du fest, was Bier, Mate und Co. bei dir kosten. Kommt in einem späteren Schritt.' },
+  bauen: { title: 'Bauen', text: 'Hier kaufst und platzierst du Möbel und vergrößerst später den Laden. Kommt in einem späteren Schritt.' },
+  kiez: { title: 'Kiez', text: 'Hier triffst du deine Stammkunden und siehst, welche seltenen Besucher du schon kennst. Kommt in einem späteren Schritt.' },
+};
+const panel = $('panel');
+function openPanel(key: string) {
+  $('panel-title').textContent = PANELS[key].title;
+  $('panel-text').textContent = PANELS[key].text;
+  panel.hidden = false;
+  $('panel-close').focus();
+}
+const closePanel = () => { panel.hidden = true; };
+document.querySelectorAll<HTMLElement>('[data-panel]').forEach(b => b.addEventListener('click', () => openPanel(b.dataset.panel!)));
+$('panel-close').addEventListener('click', closePanel);
+panel.addEventListener('click', e => { if (e.target === panel) closePanel(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+fillIcons();
 
 // ---------- Einstellungen merken ----------
 const SETTINGS_KEY = 'kiezkoenig-settings';

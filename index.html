@@ -26,7 +26,31 @@
 
   <section class="screen" id="screen-play" hidden>
     <div class="room-scroll" id="room-scroll"><canvas id="room"></canvas></div>
-    <button class="btn btn-small hud-back" data-back type="button">Menü</button>
+
+    <header class="hud-top wood">
+      <span class="stat"><img data-icon="money"><span id="hud-money"></span></span>
+      <span class="stat"><img data-icon="clock"><span id="hud-time"></span></span>
+      <span class="stat"><img data-icon="star"><span id="hud-rating"></span></span>
+      <button class="hud-menu" data-back type="button" aria-label="Zurück zum Hauptmenü">Menü</button>
+    </header>
+    <p class="stock-warning" id="hud-stock" hidden><img data-icon="stock"><span></span></p>
+
+    <nav class="hud-bottom wood">
+      <button class="sign" data-panel="lager" type="button"><img data-icon="lager"><span>Lager</span></button>
+      <button class="sign" data-panel="preise" type="button"><img data-icon="preise"><span>Preise</span></button>
+      <button class="sign" data-panel="bauen" type="button"><img data-icon="bauen"><span>Bauen</span></button>
+      <button class="sign" data-panel="kiez" type="button"><img data-icon="kiez"><span>Kiez</span></button>
+    </nav>
+
+    <div class="panel-backdrop" id="panel" hidden>
+      <section class="panel wood" role="dialog" aria-modal="true" aria-labelledby="panel-title">
+        <div class="panel-paper">
+          <h3 id="panel-title"></h3>
+          <p id="panel-text"></p>
+        </div>
+        <button class="sign sign-wide" id="panel-close" type="button"><span>Schließen</span></button>
+      </section>
+    </div>
   </section>
 
   <section class="screen" id="screen-settings" hidden>
