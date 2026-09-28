@@ -2,61 +2,11 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<meta name="theme-color" content="#12160f">
-<title>Frontline</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Stencil+One&family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@600&display=swap">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Späti</title>
 </head>
 <body>
-<div id="app">
-  <div id="viewport"></div>
-
-  <header class="hud-top">
-    <div class="scoreline">
-      <div class="team blue"><span class="team-name">Nordbund</span><b id="score-blue">0</b></div>
-      <div class="clock"><span id="clock">4:00</span><small id="clock-note">Ziel 400</small></div>
-      <div class="team red"><b id="score-red">0</b><span class="team-name">Südpakt</span></div>
-    </div>
-    <div class="scorebar"><div id="bar-blue"></div><div id="bar-red"></div></div>
-    <div class="points" id="points"></div>
-  </header>
-
-  <div class="feed" id="feed" aria-live="polite"></div>
-
-  <footer class="hud-bottom">
-    <div class="supply-row">
-      <div class="supply"><span class="label">Nachschub</span><b id="supply">0</b></div>
-      <button class="chip-btn" id="btn-all" type="button">Alle wählen</button>
-    </div>
-    <div class="cards" id="cards"></div>
-  </footer>
-
-  <div class="overlay" id="start">
-    <div class="sheet">
-      <p class="eyebrow">Gefecht · Sektor B</p>
-      <h1>FRONTLINE</h1>
-      <p class="lede">Nordbund gegen Südpakt. Halte mehr Punkte als der Gegner, bis die Zeit abläuft oder ein Team 400 Punkte hat.</p>
-      <ul class="howto">
-        <li><b>Karte auswählen</b> unten, um Einheiten ins Feld zu schicken</li>
-        <li><b>Einheit antippen</b>, dann <b>Boden antippen</b>, um sie zu bewegen</li>
-        <li><b>Wischen</b> verschiebt die Karte, <b>zwei Finger</b> zoomen</li>
-        <li>Panzerabwehr knackt Panzer, Panzer zerlegen Infanterie, Aufklärer decken Feinde auf</li>
-      </ul>
-      <button class="cta" id="btn-start" type="button">Gefecht starten</button>
-    </div>
-  </div>
-
-  <div class="overlay" id="end" hidden>
-    <div class="sheet">
-      <p class="eyebrow" id="end-eyebrow">Gefecht beendet</p>
-      <h1 id="end-title">SIEG</h1>
-      <dl class="stats" id="end-stats"></dl>
-      <button class="cta" id="btn-again" type="button">Nächstes Gefecht</button>
-    </div>
-  </div>
-</div>
+<div id="app"></div>
 <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
