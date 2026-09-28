@@ -1,26 +1,21 @@
-# Frontline
+# Kiezkönig
 
-Ein casual Frontkriegs-Spiel fürs Handy (Arbeitstitel). Zwei Fraktionen kämpfen auf einer
-gemeinsamen Hex-Karte, und jede Aktion verschiebt die Frontlinie. Inspiriert von Foxhole und
-Broken Arrow, aber in kurzen Sessions spielbar.
+Ein Späti-Spiel fürs Handy mit simpler Pixel-Grafik. Wird Schritt für Schritt aufgebaut.
 
 ## Starten
 
-Keine Installation nötig: **`index.html` im Browser öffnen**, am PC oder am Handy.
-
-Alternativ als lokaler Server (zum Testen auf dem Handy im selben WLAN):
-
 ```bash
-python3 -m http.server 8000
-# dann im Browser: http://<deine-ip>:8000
+npm install
+npm run dev      # Entwicklungsserver, auch im WLAN fürs Handy erreichbar
+npm run build    # fertige Version in dist/
 ```
 
-## So wird gespielt
+## Projekt
 
-1. Fraktion wählen: Nordbund oder Südpakt
-2. Einen Sektor an der gelben Frontlinie antippen
-3. **Angreifen** (feindlicher Sektor) oder **Verstärken** (eigener Frontsektor), das kostet ⚡
-4. Bots kämpfen auf beiden Seiten mit, die Front lebt
-5. Wer das feindliche Hauptquartier (★) einnimmt, gewinnt den Krieg
+- `index.html`: Bildschirme (Menü, Einstellungen, Debug)
+- `src/main.ts`: Logik
+- `src/ui/style.css`: Aussehen
+- `drafts/`: geparkte Entwürfe, noch nicht eingebaut
+- `capacitor.config.ts`: Grundlage für die spätere Android- und iOS-App
 
-Wie es weitergeht, steht in der [ROADMAP.md](ROADMAP.md).
+Der Plan steht in der [ROADMAP.md](ROADMAP.md).

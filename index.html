@@ -2,11 +2,47 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Späti</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#16121f">
+<title>Kiezkönig</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap">
 </head>
 <body>
-<div id="app"></div>
+<main id="app">
+  <section class="screen" id="screen-menu">
+    <div class="logo">
+      <p class="tag">Debug-Build</p>
+      <h1>KIEZ<br>KÖNIG</h1>
+    </div>
+    <nav class="menu">
+      <button class="btn primary" id="btn-play" type="button">Spielen</button>
+      <button class="btn" id="btn-settings" type="button">Einstellungen</button>
+      <button class="btn" id="btn-debug" type="button">Debug-Info</button>
+    </nav>
+    <p class="version" id="version"></p>
+  </section>
+
+  <section class="screen" id="screen-play" hidden>
+    <h2>Spielen</h2>
+    <p class="note">Hier kommt in einem späteren Schritt der Späti hin.</p>
+    <button class="btn" data-back type="button">Zurück</button>
+  </section>
+
+  <section class="screen" id="screen-settings" hidden>
+    <h2>Einstellungen</h2>
+    <label class="row"><span>Sound</span><input type="checkbox" id="opt-sound" checked></label>
+    <label class="row"><span>Musik</span><input type="checkbox" id="opt-music" checked></label>
+    <button class="btn" data-back type="button">Zurück</button>
+  </section>
+
+  <section class="screen" id="screen-debug" hidden>
+    <h2>Debug-Info</h2>
+    <dl class="info" id="debug-info"></dl>
+    <button class="btn" data-back type="button">Zurück</button>
+  </section>
+</main>
 <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
