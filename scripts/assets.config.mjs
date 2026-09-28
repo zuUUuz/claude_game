@@ -11,55 +11,65 @@
 
 // Einheitlicher Stil für alle Bilder
 export const STYLE =
-  'Pixel art, 16-bit retro game style, flat front-facing side view, clean crisp pixels, ' +
-  'bold dark outlines, limited palette of warm yellows, deep night blues and neon pink accents, ' +
-  'cozy Berlin night mood.';
+  'Detailed pixel art in the style of modern cozy indie games like Stardew Valley, clean crisp pixels, ' +
+  'slightly top-down three-quarter view, dark outlines, colorful and varied palette with many distinct hues ' +
+  '(greens, blues, reds, yellows, purples) on a cozy evening base of deep night blues with warm lamp light ' +
+  'and a few neon pink accents, subtle Berlin flair, charming and a little humorous.';
 
 export const ASSETS = [
   {
     id: 'shop-interior',
     prompt:
-      'Interior of a small Berlin "Späti" late-night kiosk seen like a stage with the front wall removed. ' +
-      'Back wall with glowing drink fridges full of colorful bottles, wooden counter with a cash register on the left, ' +
-      'snack shelves, a door on the right, warm yellow lighting, slightly messy. No characters, no text.',
+      'Wide interior of a small Berlin "Späti" late-night kiosk, seen from slightly above in three-quarter view ' +
+      'so the floor is visible, like a cozy room in a simulation game. The shop is wide and fills the whole image. ' +
+      'Brightly lit: back wall with drink fridges full of bottles in many different colors (green beer bottles, ' +
+      'yellow mate bottles, red and blue cans), wooden counter with a cash register on the left, snack shelves with ' +
+      'colorful packages in the middle, a door on the right, a few Berlin details like a sticker-covered fridge and a ' +
+      'crate of empty deposit bottles. Evening mood through the window. No characters, no text.',
     size: '1536x1024',
     background: 'opaque',
-    pixelWidth: 384,
-    colors: 48,
+    pixelWidth: 512,
+    colors: 64,
   },
   {
     id: 'char-raver',
     prompt:
-      'Single full-body character sprite standing and facing the viewer: a Berlin techno raver in his 20s, ' +
-      'black outfit, sunglasses on his head, holding a bottle of Club-Mate. Centered, transparent background, no text.',
+      'Single full-body character sprite, slightly top-down three-quarter view, standing and facing the viewer: ' +
+      'a stereotypical Berlin techno raver in his 20s, slightly exaggerated proportions with a somewhat larger head ' +
+      'and expressive face, black mesh shirt, glitter on the cheeks, round sunglasses pushed up, bleached hair, ' +
+      'tired but happy grin, holding a yellow bottle of Club-Mate. Friendly caricature with a wink. ' +
+      'Centered, transparent background, no text.',
     size: '1024x1024',
     background: 'transparent',
-    pixelWidth: 128,
-    colors: 24,
+    pixelWidth: 160,
+    colors: 32,
     reference: 'shop-interior',
   },
   {
     id: 'items',
     prompt:
-      'Sprite sheet of 6 item icons arranged in a 3x2 grid with even spacing: beer bottle, bottle of Club-Mate, ' +
-      'chocolate bar, paper coffee cup, small shot bottle of peppermint liqueur, lottery ticket. ' +
-      'Same size each, transparent background, no text.',
+      'Sprite sheet of 6 item icons arranged in a 3x2 grid with even spacing, each item in its typical real-world ' +
+      'colors but without real logos: green glass beer bottle with a plain label, yellow-orange Club-Mate style bottle, ' +
+      'chocolate bar in a purple wrapper with the chocolate partly showing, white paper coffee cup with a brown lid, ' +
+      'tiny green shot bottle of peppermint liqueur, small paper lottery ticket (a slip of paper with a grid of ' +
+      'numbered boxes and a few crosses, not a calculator). Same size each, transparent background, no text.',
     size: '1024x1024',
     background: 'transparent',
-    pixelWidth: 192,
-    colors: 32,
+    pixelWidth: 256,
+    colors: 48,
     reference: 'shop-interior',
   },
   {
     id: 'shop-exterior',
     prompt:
-      'Front view of an old Berlin apartment building at night with a small Späti kiosk on the ground floor, ' +
-      'glowing pink neon sign without letters, warm light from the shop window, beer bench on the sidewalk, ' +
-      'street lamp, dark blue sky with a few stars. No text.',
+      'Front view, slightly from above, of an old Berlin apartment building in the evening with a small Späti kiosk ' +
+      'on the ground floor, glowing pink neon sign without letters, warm bright light from the shop window showing ' +
+      'colorful goods, beer bench on the sidewalk, a bicycle, a few stickers and a small graffiti tag, street lamp, ' +
+      'deep blue sky with a few stars. No text.',
     size: '1024x1536',
     background: 'opaque',
-    pixelWidth: 256,
-    colors: 48,
+    pixelWidth: 320,
+    colors: 64,
     reference: 'shop-interior',
   },
 ];
