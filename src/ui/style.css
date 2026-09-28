@@ -1,4 +1,4 @@
-/* Kiezkönig – Debug-Menü. Pixel-Look, später mit KI-generierten Assets. */
+/* Kiezkönig – Menü und Späti-Ansicht im Pixel-Look. */
 :root {
   color-scheme: dark;
   --night: #16121f;
@@ -37,3 +37,11 @@ h2 { margin: 0; font-size: 32px; color: var(--neon); }
 .info { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; background: var(--panel); border: 3px solid var(--edge); padding: 12px 14px; font-size: 15px; }
 .info dt { color: var(--muted); }
 .info dd { margin: 0; text-align: right; word-break: break-all; }
+
+/* Spielen: Späti als Vollbild, seitlich wischbar */
+#screen-play { position: fixed; inset: 0; max-width: none; gap: 0; background: #0b0911; }
+.room-scroll { flex: 1; display: flex; align-items: center; overflow-x: auto; overflow-y: hidden; overscroll-behavior: contain; scrollbar-width: none; }
+.room-scroll::-webkit-scrollbar { display: none; }
+#room { display: block; flex: none; margin: 0 auto; image-rendering: pixelated; }
+.hud-back { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 12px); left: 12px; }
+.btn-small { font-size: 16px; padding: 8px 12px; }

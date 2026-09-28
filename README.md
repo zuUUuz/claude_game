@@ -14,6 +14,7 @@ npm run build    # fertige Version in dist/
 
 - `index.html`: Bildschirme (Menü, Einstellungen, Debug)
 - `src/main.ts`: Logik
+- `src/game/room.ts`: Späti-Innenraum (Wand, Boden, Möbel) zeichnen
 - `src/ui/style.css`: Aussehen
 - `drafts/`: geparkte Entwürfe, noch nicht eingebaut
 - `capacitor.config.ts`: Grundlage für die spätere Android- und iOS-App
