@@ -1,5 +1,5 @@
 import './ui/style.css';
-import { renderRoom } from './game/room';
+import { renderRoom, SCREEN_WIDTH } from './game/room';
 
 const VERSION = '0.2.0';
 const $ = (id: string) => document.getElementById(id)!;
@@ -22,10 +22,16 @@ const room = $('room') as HTMLCanvasElement;
 const roomScroll = $('room-scroll');
 let roomReady: Promise<void> | null = null;
 
-// Größte ganzzahlige Vergrößerung, bei der der Raum in die Höhe passt
+// Größte Vergrößerung, bei der ein Bildschirm breit Raum und die ganze Höhe passen.
+// Gerechnet in echten Gerätepixeln, damit die Bildpixel möglichst gleich groß und scharf bleiben.
 function fitRoom() {
   if (!room.height) return;
-  const scale = Math.max(1, Math.floor(roomScroll.clientHeight / room.height));
+  const dpr = window.devicePixelRatio || 1;
+  const fitW = (roomScroll.clientWidth * dpr) / SCREEN_WIDTH;
+  const fitH = (roomScroll.clientHeight * dpr) / room.height;
+  const fit = Math.min(fitW, fitH);
+  // Ganzzahlig, solange das mindestens 90 % füllt; sonst exakt einpassen (bei hoher Pixeldichte kaum sichtbar)
+  const scale = (Math.floor(fit) >= fit * 0.9 ? Math.max(1, Math.floor(fit)) : fit) / dpr;
   room.style.width = `${room.width * scale}px`;
   room.style.height = `${room.height * scale}px`;
 }
@@ -34,7 +40,7 @@ async function openRoom() {
   roomReady ??= renderRoom(room);
   await roomReady;
   fitRoom();
-  // Beim Öffnen mittig starten
+  // Bei einem breiteren Raum (später durch Upgrades) mittig starten
   roomScroll.scrollLeft = (roomScroll.scrollWidth - roomScroll.clientWidth) / 2;
 }
 window.addEventListener('resize', fitRoom);

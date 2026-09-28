@@ -18,10 +18,13 @@ interface Placed { type: FurnitureType; x: number; y: number }
 const START_LAYOUT: Placed[] = [
   { type: 'shelf', x: 110, y: 3 },
   { type: 'fridge', x: 208, y: 3 },
-  { type: 'fridge', x: 365, y: 3 },
   { type: 'crate', x: 300, y: 55 },
   { type: 'counter', x: 170, y: 110 },
 ];
+
+// Breite des Start-Spätis in Pixeln = genau ein Bildschirm. Upgrades machen den Raum später breiter,
+// die Vergrößerung richtet sich aber immer nach dieser Breite.
+export const SCREEN_WIDTH = 384;
 
 // Die Wand hat unten einen Rest Boden im Bild, der abgeschnitten wird
 const WALL_CROP = 0.955;
