@@ -28,6 +28,7 @@ Die Liste steht in `scripts/assets.config.mjs`.
 ```bash
 npm run assets                 # fehlende Assets erzeugen
 npm run assets -- char-raver   # ein bestimmtes Asset neu erzeugen
+npm run assets -- --pixel      # nur aus vorhandenen Rohbildern neu herunterrechnen (ohne API)
 ```
 
 Braucht `OPENAI_API_KEY` als Umgebungsvariable und Netzwerkzugriff auf `api.openai.com`.

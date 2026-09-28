@@ -5,7 +5,8 @@
 //   prompt     was auf dem Bild sein soll (der Stil-Block wird automatisch vorangestellt)
 //   size       Größe, in der die KI generiert: 1024x1024, 1536x1024 (quer), 1024x1536 (hoch)
 //   background 'transparent' für Figuren und Objekte, sonst 'opaque'
-//   pixelWidth Breite der fertigen Pixel-Grafik; kleiner = gröbere Pixel
+//   pixelWidth Breite der fertigen Pixel-Grafik; kleiner = gröbere Pixel.
+//              Bei Möbeln bestimmt das auch die Größe im Raum (Maßstab: Tür ≈ 165 Pixel hoch)
 //   colors     maximale Farbanzahl nach der Aufbereitung
 //   reference  optional: id eines schon erzeugten Assets als Stilvorlage
 
@@ -70,6 +71,69 @@ export const ASSETS = [
     background: 'opaque',
     pixelWidth: 320,
     colors: 64,
+    reference: 'shop-interior',
+  },
+  // Ausbaubarer Innenraum: leerer Raum als Hintergrund, Möbel als Einzelteile zum Platzieren
+  {
+    id: 'room-empty',
+    prompt:
+      'Wide empty interior of a small Berlin "Späti" late-night kiosk, seen from slightly above in three-quarter view ' +
+      'so a large empty floor is visible, like an empty room at the start of a simulation game. Only the bare room: ' +
+      'brick back wall, simple tiled floor, a shop window on the left showing the evening street, an entrance door on ' +
+      'the right, two hanging lamps. Completely empty: no furniture, no fridges, no shelves, no counter, no goods, ' +
+      'no characters, no text. Lots of free floor and wall space to place furniture later.',
+    size: '1536x1024',
+    background: 'opaque',
+    pixelWidth: 512,
+    colors: 64,
+    reference: 'shop-interior',
+  },
+  {
+    id: 'furn-fridge',
+    prompt:
+      'Single piece of shop furniture as a game object sprite, slightly top-down three-quarter view matching a ' +
+      'simulation game room: a tall glass-door drink fridge full of colorful bottles (green beer, yellow mate, red and blue cans), glowing from inside, a few stickers on the side. ' +
+      'Centered, whole object visible, no floor, no shadow on the background, transparent background, no text.',
+    size: '1024x1024',
+    background: 'transparent',
+    pixelWidth: 160,
+    colors: 32,
+    reference: 'shop-interior',
+  },
+  {
+    id: 'furn-counter',
+    prompt:
+      'Single piece of shop furniture as a game object sprite, slightly top-down three-quarter view matching a ' +
+      'simulation game room: a wooden shop counter with an old grey cash register on top. ' +
+      'Centered, whole object visible, no floor, no shadow on the background, transparent background, no text.',
+    size: '1024x1024',
+    background: 'transparent',
+    pixelWidth: 176,
+    colors: 32,
+    reference: 'shop-interior',
+  },
+  {
+    id: 'furn-snackshelf',
+    prompt:
+      'Single piece of shop furniture as a game object sprite, slightly top-down three-quarter view matching a ' +
+      'simulation game room: a wooden snack shelf with three tiers of colorful chip bags and candy packages. ' +
+      'Centered, whole object visible, no floor, no shadow on the background, transparent background, no text.',
+    size: '1024x1024',
+    background: 'transparent',
+    pixelWidth: 128,
+    colors: 32,
+    reference: 'shop-interior',
+  },
+  {
+    id: 'furn-crate',
+    prompt:
+      'Single piece of shop furniture as a game object sprite, slightly top-down three-quarter view matching a ' +
+      'simulation game room: a blue plastic crate full of empty brown deposit beer bottles. ' +
+      'Centered, whole object visible, no floor, no shadow on the background, transparent background, no text.',
+    size: '1024x1024',
+    background: 'transparent',
+    pixelWidth: 64,
+    colors: 32,
     reference: 'shop-interior',
   },
 ];

@@ -4,6 +4,7 @@
 //   npm run assets                 alle fehlenden Assets erzeugen
 //   npm run assets -- char-raver   nur bestimmte Assets (auch wenn sie schon existieren)
 //   npm run assets -- --force      alle neu erzeugen
+//   npm run assets -- --pixel      nur aus vorhandenen Rohbildern neu herunterrechnen (kostet nichts)
 //
 // Braucht die Umgebungsvariable OPENAI_API_KEY und Netzwerkzugriff auf api.openai.com.
 // Rohbilder landen in assets/raw/, fertige Pixel-Grafik in assets/.
@@ -26,6 +27,7 @@ if (!key) {
 
 const args = process.argv.slice(2);
 const force = args.includes('--force');
+const pixelOnly = args.includes('--pixel');
 const only = args.filter(a => !a.startsWith('--'));
 
 async function exists(p) { try { await fs.access(p); return true; } catch { return false; } }
@@ -80,6 +82,12 @@ if (only.length && list.length !== only.length) {
 for (const asset of list) {
   const rawPath = path.join(RAW, `${asset.id}.png`);
   const outPath = path.join(OUT, `${asset.id}.png`);
+  if (pixelOnly) {
+    if (!await exists(rawPath)) { console.log(`= ${asset.id} hat kein Rohbild`); continue; }
+    await fs.writeFile(outPath, await pixelate(await fs.readFile(rawPath), asset));
+    console.log(`↻ assets/${asset.id}.png`);
+    continue;
+  }
   if (!force && !only.length && await exists(outPath)) { console.log(`= ${asset.id} existiert schon`); continue; }
   process.stdout.write(`… ${asset.id} wird generiert (${asset.size}) `);
   const raw = await generate(asset);
