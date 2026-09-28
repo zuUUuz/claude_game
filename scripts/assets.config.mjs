@@ -142,4 +142,55 @@ export const ASSETS = [
       ],
     },
   },
+  // Menüs im Spiel: Holz und Pappe, werden später mit dem Späti aufgewertet
+  {
+    id: 'ui-icons',
+    prompt:
+      'Sprite sheet of 8 small game UI icons arranged in a 4x2 grid with lots of empty space between them, all the same ' +
+      'size and style, bold and readable at small size, front view, hand-made cozy look: ' +
+      'top row: a gold coin with a euro sign, a round wall clock, a yellow star, a cardboard box with a red exclamation mark; ' +
+      'bottom row: a wooden crate full of bottles, a paper price tag on a string, a hammer crossed with a saw, ' +
+      'a speech bubble with a small heart. Transparent background, no text.',
+    size: '1536x1024',
+    background: 'transparent',
+    pixelWidth: 384,
+    colors: 48,
+    reference: 'room-wall',
+    split: {
+      cols: 4, rows: 2,
+      parts: [
+        { id: 'icon-money', pixelWidth: 24 },
+        { id: 'icon-clock', pixelWidth: 24 },
+        { id: 'icon-star', pixelWidth: 24 },
+        { id: 'icon-stock', pixelWidth: 24 },
+        { id: 'icon-lager', pixelWidth: 32 },
+        { id: 'icon-preise', pixelWidth: 32 },
+        { id: 'icon-bauen', pixelWidth: 32 },
+        { id: 'icon-kiez', pixelWidth: 32 },
+      ],
+    },
+  },
+  {
+    id: 'ui-wood',
+    prompt:
+      'Seamless texture of old warm brown wooden planks running horizontally, seen straight on, filling the whole image ' +
+      'edge to edge: a few boards with visible grain, small nail heads and slight wear. Flat, even lighting, no border, ' +
+      'no objects, no text.',
+    size: '1536x1024',
+    background: 'opaque',
+    pixelWidth: 192,
+    colors: 16,
+  },
+  {
+    id: 'ui-sign',
+    prompt:
+      'A single blank rectangular sign made of a piece of wood with a torn cardboard label glued on it, seen straight ' +
+      'from the front, slightly wider than tall, simple game button, the cardboard area is empty and plain so text and ' +
+      'an icon can be placed on it. Transparent background, no text, no symbols.',
+    size: '1024x1024',
+    background: 'transparent',
+    pixelWidth: 96,
+    colors: 24,
+    reference: 'room-wall',
+  },
 ];
