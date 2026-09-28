@@ -79,8 +79,10 @@ export const ASSETS = [
     prompt:
       'Wide empty interior of a small Berlin "Späti" late-night kiosk, seen from slightly above in three-quarter view ' +
       'so a large empty floor is visible, like an empty room at the start of a simulation game. Only the bare room: ' +
-      'brick back wall, simple tiled floor, a shop window on the left showing the evening street, an entrance door on ' +
-      'the right, two hanging lamps. Completely empty: no furniture, no fridges, no shelves, no counter, no goods, ' +
+      'back wall, simple tiled floor, a shop window on the left showing the evening street, an entrance door on ' +
+      'the right, two hanging lamps. The room is bright and well lit by warm ceiling lamps and fluorescent light: ' +
+      'light painted walls with some exposed light brick, light warm floor tiles, friendly and inviting. ' +
+      'Dark night blue only outside the window, not inside. Completely empty: no furniture, no fridges, no shelves, no counter, no goods, ' +
       'no characters, no text. Lots of free floor and wall space to place furniture later.',
     size: '1536x1024',
     background: 'opaque',
