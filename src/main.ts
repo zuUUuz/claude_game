@@ -94,3 +94,9 @@ function renderDebug() {
 }
 
 $('version').textContent = `Version ${VERSION}`;
+
+// ---------- Web-App: offline spielbar, Updates beim nächsten Start ----------
+// Nur in der veröffentlichten Version, nicht im Entwicklungsserver; in eingebetteten Vorschauen schlägt es still fehl
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => { /* z. B. in der Claude-Vorschau nicht erlaubt */ });
+}
