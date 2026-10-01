@@ -25,15 +25,16 @@
   </section>
 
   <section class="screen" id="screen-play" hidden>
-    <div class="room-scroll" id="room-scroll"><canvas id="room"></canvas></div>
-
     <header class="hud-top wood">
       <span class="stat"><img data-icon="money"><span id="hud-money"></span></span>
       <span class="stat"><img data-icon="clock"><span id="hud-time"></span></span>
       <span class="stat"><img data-icon="star"><span id="hud-rating"></span></span>
       <button class="hud-menu" data-back type="button" aria-label="Zurück zum Hauptmenü">Menü</button>
     </header>
-    <p class="stock-warning" id="hud-stock" hidden><img data-icon="stock"><span></span></p>
+    <div class="room-area">
+      <div class="room-scroll" id="room-scroll"><canvas id="room"></canvas></div>
+      <p class="stock-warning" id="hud-stock" hidden><img data-icon="stock"><span></span></p>
+    </div>
 
     <nav class="hud-bottom wood">
       <button class="sign" data-panel="lager" type="button"><img data-icon="lager"><span>Lager</span></button>

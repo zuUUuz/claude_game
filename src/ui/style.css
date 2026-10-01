@@ -40,6 +40,7 @@ h2 { margin: 0; font-size: 32px; color: var(--neon); }
 
 /* Spielen: Späti füllt den ganzen Bildschirm, später seitlich wischbar */
 #screen-play { position: fixed; inset: 0; max-width: none; gap: 0; background: #0b0911; }
+.room-area { position: relative; flex: 1; min-height: 0; display: flex; }
 .room-scroll { flex: 1; display: flex; align-items: flex-start; overflow-x: auto; overflow-y: hidden; overscroll-behavior: contain; scrollbar-width: none; }
 .room-scroll::-webkit-scrollbar { display: none; }
 #room { display: block; flex: none; margin: 0 auto; image-rendering: pixelated; }
@@ -63,7 +64,6 @@ h2 { margin: 0; font-size: 32px; color: var(--neon); }
   border: 3px solid var(--wood-edge);
 }
 .hud-top {
-  position: absolute; top: 0; left: 0; right: 0;
   display: flex; align-items: center; gap: 10px;
   padding: calc(env(safe-area-inset-top, 0px) + 8px) 12px 8px;
   border-width: 0 0 3px;
@@ -78,14 +78,13 @@ h2 { margin: 0; font-size: 32px; color: var(--neon); }
   box-shadow: 2px 2px 0 var(--wood-edge); cursor: pointer;
 }
 .stock-warning {
-  position: absolute; left: 12px; top: calc(env(safe-area-inset-top, 0px) + 52px); margin: 0;
+  position: absolute; left: 12px; top: 10px; margin: 0;
   display: inline-flex; align-items: center; gap: 6px;
   background: var(--paper); color: var(--warn); border: 3px solid var(--wood-edge);
   padding: 3px 8px; font-size: 14px; font-weight: 700; box-shadow: 2px 2px 0 var(--wood-edge);
   transform: rotate(-2deg);
 }
 .hud-bottom {
-  position: absolute; left: 0; right: 0; bottom: 0;
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
   padding: 10px 10px calc(env(safe-area-inset-bottom, 0px) + 10px);
   border-width: 3px 0 0;
