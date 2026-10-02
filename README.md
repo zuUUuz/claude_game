@@ -20,6 +20,7 @@ npm run build    # fertige Version in dist/
 - `src/game/state.ts`: Spielstand mit Speichern
 - `src/game/config.ts`: alle Stellschrauben (Tempo, Preise, Geduld, Beliebtheit, Kundenandrang)
 - `src/game/customers.ts`: Kundentypen, Sprüche und Fragen; neue Sprüche hier eintragen
+- `src/game/regulars.ts`: Stammkunden mit ihren Geschichten über mehrere Tage
 - `src/game/sim.ts`: Uhr, Kunden, Schlange, Kassieren
 - `src/ui/icons.ts`: Pixel-Icons als Platzhalter
 - `src/ui/style.css`: Aussehen

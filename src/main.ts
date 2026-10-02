@@ -4,9 +4,10 @@ import { state, saveGame, resetGame, day, formatMoney, formatTime, formatRating 
 import { BEER, QUEUE, TIME } from './game/config';
 import { CUSTOMERS, drawPerson, Choice } from './game/customers';
 import * as sim from './game/sim';
+import { REGULARS } from './game/regulars';
 import { fillIcons } from './ui/icons';
 
-const VERSION = '0.4.0';
+const VERSION = '0.5.0';
 const $ = (id: string) => document.getElementById(id)!;
 
 // ---------- Bildschirme wechseln ----------
@@ -82,6 +83,7 @@ function personDrawable(c: sim.Customer) {
       const x = Math.round(c.x);
       footShadow(ctx, x, footY - 1, 26);
       drawPerson(ctx, c.type, x, footY, c.step);
+      if (c.regularId) drawHeart(ctx, x, footY - 128);
       // Geduld als kleiner Balken über dem Kopf, nur in der Schlange
       if (c.phase === 'queue') {
         const left = Math.max(0, c.patience / QUEUE.patienceMinutes);
@@ -93,6 +95,17 @@ function personDrawable(c: sim.Customer) {
     },
   };
 }
+
+// Kleines Pixel-Herz über Stammkunden
+const HEART = ['.pp.pp.', 'ppppppp', 'ppppppp', '.ppppp.', '..ppp..', '...p...'];
+function drawHeart(ctx: CanvasRenderingContext2D, x: number, top: number) {
+  ctx.fillStyle = '#1a1014';
+  ctx.fillRect(x - 5, top - 1, 9, 8);
+  ctx.fillStyle = '#ff4fa3';
+  HEART.forEach((row, y) => [...row].forEach((p, i) => { if (p === 'p') ctx.fillRect(x - 4 + i, top + y, 1, 1); }));
+}
+
+const hearts = (n: number) => '♥'.repeat(n) + '♡'.repeat(5 - n);
 
 // ---------- Sprechblasen über den Köpfen ----------
 const bubbleLayer = $('bubbles');
@@ -129,7 +142,10 @@ checkoutBtn.addEventListener('click', () => {
   if (!checkout) return;
   talking = checkout;
   const kind = CUSTOMERS[checkout.customer.type];
-  $('talk-name').textContent = `${checkout.customer.name} · ${kind.label}`;
+  const regular = checkout.customer.regularId;
+  $('talk-name').textContent = regular
+    ? `${checkout.customer.name} · Stammkunde ${hearts(state.regulars[regular]?.friendship ?? 0)}`
+    : `${checkout.customer.name} · ${kind.label}`;
   $('talk-text').textContent = checkout.question?.text ?? checkout.line ?? '';
   const choices = $('talk-choices');
   choices.replaceChildren();
@@ -172,7 +188,7 @@ const PANELS: Record<string, { title: string; text: string }> = {
   lager: { title: 'Lager', text: '' },
   preise: { title: 'Preise', text: `Bier kostet bei dir ${formatMoney(BEER.price)}. Preise selbst festlegen kommt in einem späteren Schritt.` },
   bauen: { title: 'Bauen', text: 'Hier kaufst und platzierst du Möbel und vergrößerst später den Laden. Kommt in einem späteren Schritt.' },
-  kiez: { title: 'Kiez', text: 'Hier triffst du deine Stammkunden und siehst, welche seltenen Besucher du schon kennst. Kommt in einem späteren Schritt.' },
+  kiez: { title: 'Kiez', text: '' },
 };
 const panel = $('panel');
 function openPanel(key: string) {
@@ -180,6 +196,7 @@ function openPanel(key: string) {
   $('panel-text').textContent = PANELS[key].text;
   $('panel-body').replaceChildren();
   if (key === 'lager') renderLager();
+  if (key === 'kiez') renderKiez();
   panel.hidden = false;
   $('panel-close').focus();
 }
@@ -205,6 +222,29 @@ function renderLager() {
     if (sim.orderBeer()) { saveGame(); renderLager(); }
   });
   $('panel-body').replaceChildren(order, note);
+}
+// Kiez: Stammkunden, die du schon kennst
+function renderKiez() {
+  const known = REGULARS.filter(r => state.regulars[r.id]);
+  $('panel-text').textContent = known.length
+    ? 'Deine Stammkunden:'
+    : 'Noch keine Stammkunden. Die tauchen von selbst auf, wenn dein Laden läuft. Halt abends mal die Augen offen.';
+  $('panel-body').replaceChildren(...known.map(r => {
+    const memory = state.regulars[r.id];
+    const card = document.createElement('div');
+    card.className = 'regular';
+    const name = document.createElement('p');
+    name.className = 'regular-name';
+    name.textContent = `${r.name} ${hearts(memory.friendship)}`;
+    const intro = document.createElement('p');
+    intro.className = 'regular-text';
+    intro.textContent = r.intro;
+    const last = document.createElement('p');
+    last.className = 'regular-last';
+    last.textContent = `Zuletzt (Tag ${memory.lastDay}): ${memory.last}`;
+    card.append(name, intro, last);
+    return card;
+  }));
 }
 fillIcons();
 
@@ -251,3 +291,6 @@ $('btn-reset').addEventListener('click', () => {
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => { /* z. B. in der Claude-Vorschau nicht erlaubt */ });
 }
+
+// Nur im Entwicklungsmodus: Zugriff für automatische Tests (spult z. B. Spieltage im Schnelldurchlauf vor)
+if (import.meta.env.DEV) Object.assign(window, { kiez: { state, sim } });

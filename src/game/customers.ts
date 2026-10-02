@@ -5,10 +5,14 @@ export type CustomerType = 'oma' | 'raver' | 'tourist' | 'bauarbeiter';
 
 export interface Choice {
   label: string;
-  money?: number;  // zusätzlich zum Bierpreis, z. B. -1 für einen geliehenen Euro
+  money?: number;      // zusätzlich zum Bierpreis, z. B. -1 für einen geliehenen Euro
   rating?: number;
-  sell?: boolean;  // false: Kunde kauft am Ende doch nichts
-  result: string;  // was der Kunde danach sagt
+  sell?: boolean;      // false: Kunde kauft am Ende doch nichts
+  unpaid?: boolean;    // Bier geht raus, aber ohne zu bezahlen (angeschrieben)
+  sellExtra?: number;  // so viele Flaschen zusätzlich, soweit im Lager
+  friendship?: number; // nur bei Stammkunden: Herzen dazu oder weg
+  set?: Record<string, boolean>; // nur bei Stammkunden: daran erinnert er sich später
+  result: string;      // was der Kunde danach sagt
 }
 
 export interface Question {

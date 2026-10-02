@@ -1,6 +1,7 @@
 // Spielstand: wird im Browser gespeichert, damit der Späti beim nächsten Öffnen weiterläuft.
 
 import { BEER, RATING, START_MONEY, TIME } from './config';
+import type { RegularMemory } from './regulars';
 
 export interface GameState {
   version: 1;
@@ -8,12 +9,13 @@ export interface GameState {
   minutes: number; // Spielzeit in Minuten seit Tag 1, 0 Uhr
   rating: number;  // Beliebtheit im Kiez, 0 bis 5
   beer: number;    // Flaschen im Lager
+  regulars: Record<string, RegularMemory>; // Stammkunden, die du schon kennst
 }
 
 const SAVE_KEY = 'kiezkoenig-save';
 
 export function newGame(): GameState {
-  return { version: 1, money: START_MONEY, minutes: TIME.startMinutes, rating: RATING.start, beer: BEER.startStock };
+  return { version: 1, money: START_MONEY, minutes: TIME.startMinutes, rating: RATING.start, beer: BEER.startStock, regulars: {} };
 }
 
 function load(): GameState {

@@ -2,7 +2,8 @@
 
 import { BEER, CHOICE_CHANCE, QUEUE, RATING, TIME, TRAFFIC, WALK_SPEED } from './config';
 import { CUSTOMERS, CustomerType, Choice, Question, pick, pickType } from './customers';
-import { state, hour } from './state';
+import { REGULARS, Beat, regularById, newMemory } from './regulars';
+import { state, hour, day } from './state';
 
 // Wege im Raum, in Bildpixeln; y zählt ab der Wandkante nach unten (wie bei den Möbeln)
 const DOOR = { x: 288, y: 2 };
@@ -23,12 +24,14 @@ export interface Customer {
   patience: number; // verbleibende Wartezeit in Spielminuten
   step: number;     // für die Laufanimation
   bubble?: { text: string; until: number };
+  regularId?: string; // gesetzt bei Stammkunden
 }
 
 export interface Checkout {
   customer: Customer;
   line?: string;
   question?: Question;
+  beat?: Beat; // Begegnung eines Stammkunden
 }
 
 let nextId = 1;
@@ -38,6 +41,7 @@ let clock = 0; // echte Sekunden, für Sprechblasen
 export const customers: Customer[] = [];
 const queue: Customer[] = [];
 let reserved = 0; // Flaschen, die Kunden schon aus dem Kühlschrank genommen haben
+const regularSeenDay: Record<string, number> = {}; // Stammkunden kommen höchstens einmal am Tag rein
 
 const changeRating = (delta: number) => { state.rating = Math.min(5, Math.max(0, state.rating + delta)); };
 const say = (c: Customer, text: string) => { c.bubble = { text, until: clock + 3.5 }; };
@@ -53,13 +57,28 @@ function leave(c: Customer) {
   }
 }
 
-function spawn() {
-  const type = pickType(hour(state.minutes));
+function spawn(type: CustomerType = pickType(hour(state.minutes)), name = pick(CUSTOMERS[type].names), regularId?: string) {
   customers.push({
-    id: nextId++, type, name: pick(CUSTOMERS[type].names),
+    id: nextId++, type, name, regularId,
     x: DOOR.x, y: DOOR.y, target: { ...FRIDGE_SPOT },
     phase: 'toFridge', patience: QUEUE.patienceMinutes, step: 0,
   });
+}
+
+// Stammkunden: kommen einmal am Tag irgendwann in ihrem Zeitfenster
+function spawnRegulars(gameMinutes: number) {
+  const today = day(state.minutes), h = hour(state.minutes);
+  for (const r of REGULARS) {
+    const [from, to] = r.hours;
+    const inWindow = from <= to ? h >= from && h < to : h >= from || h < to;
+    if (!inWindow || regularSeenDay[r.id] === today || (state.regulars[r.id]?.lastDay ?? 0) === today) continue;
+    if (customers.length >= MAX_IN_SHOP || customers.some(c => c.regularId === r.id)) continue;
+    const windowMinutes = (((to - from) + 24) % 24 || 24) * 60;
+    if (Math.random() < (gameMinutes * 1.5) / windowMinutes) {
+      regularSeenDay[r.id] = today;
+      spawn(r.type, r.name, r.id);
+    }
+  }
 }
 
 // Kunde steht am Kühlschrank: Bier nehmen und anstellen, oder enttäuscht gehen
@@ -98,6 +117,7 @@ export function update(dt: number, speed: number) {
     spawnBudget -= 1;
     if (customers.length < MAX_IN_SHOP) spawn();
   }
+  spawnRegulars(gameMinutes);
 
   const walk = WALK_SPEED * speed * dt;
   for (const c of [...customers]) {
@@ -132,6 +152,14 @@ export function frontCustomer(): Customer | undefined {
 export function startCheckout(): Checkout | undefined {
   const customer = frontCustomer();
   if (!customer) return undefined;
+  if (customer.regularId) {
+    const regular = regularById(customer.regularId);
+    const memory = state.regulars[regular.id] ??= newMemory();
+    const beat = regular.beats.find(b => b.when(memory));
+    return beat
+      ? { customer, beat, question: { text: beat.text, choices: beat.choices } }
+      : { customer, line: pick(regular.greetings(memory)) };
+  }
   const kind = CUSTOMERS[customer.type];
   return Math.random() < CHOICE_CHANCE
     ? { customer, question: pick(kind.questions) }
@@ -141,15 +169,29 @@ export function startCheckout(): Checkout | undefined {
 export function finishCheckout(checkout: Checkout, choice?: Choice) {
   const c = checkout.customer;
   if (choice?.sell !== false) {
-    state.money += BEER.price;
-    state.beer--;
+    // Zusätzliche Flaschen nur, soweit nicht schon für andere Kunden in der Schlange reserviert
+    const extra = Math.max(0, Math.min(choice?.sellExtra ?? 0, state.beer - reserved));
+    if (!choice?.unpaid) state.money += BEER.price;
+    state.money += extra * BEER.price;
+    state.beer -= 1 + extra;
     changeRating(RATING.served);
   }
   state.money += choice?.money ?? 0;
   changeRating(choice?.rating ?? 0);
   if (choice) say(c, choice.result);
+  if (c.regularId) remember(c.regularId, checkout, choice);
   // leave() gibt die reservierte Flasche frei: verkauft (Bestand schon gesenkt) oder zurück ins Regal
   leave(c);
+}
+
+// Stammkunde merkt sich den Besuch und deine Antwort
+function remember(id: string, checkout: Checkout, choice?: Choice) {
+  const memory = state.regulars[id] ??= newMemory();
+  memory.lastDay = day(state.minutes);
+  memory.friendship = Math.min(5, Math.max(0, memory.friendship + (choice?.friendship ?? 0)));
+  Object.assign(memory.flags, choice?.set);
+  if (checkout.beat) memory.done.push(checkout.beat.id);
+  memory.last = choice ? `${checkout.question?.text} Du: „${choice.label}“` : checkout.line ?? '';
 }
 
 // Kunden, die ihre Sprechblase gerade zeigen
@@ -169,4 +211,5 @@ export function reset() {
   queue.length = 0;
   reserved = 0;
   spawnBudget = 0;
+  for (const id in regularSeenDay) delete regularSeenDay[id];
 }

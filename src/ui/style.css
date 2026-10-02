@@ -65,10 +65,10 @@ h2 { margin: 0; font-weight: 400; font-size: 38px; color: var(--neon); }
   border: 3px solid var(--wood-edge);
 }
 .hud-top {
-  display: flex; align-items: center; gap: 10px;
-  padding: calc(env(safe-area-inset-top, 0px) + 8px) 12px 8px;
+  display: flex; align-items: center; gap: 8px;
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) 10px 8px;
   border-width: 0 0 3px;
-  color: var(--text); font-size: 20px; text-shadow: 2px 2px 0 var(--wood-edge);
+  color: var(--text); font-size: 19px; text-shadow: 2px 2px 0 var(--wood-edge);
   font-variant-numeric: tabular-nums;
 }
 .stat { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
@@ -149,3 +149,10 @@ h2 { margin: 0; font-weight: 400; font-size: 38px; color: var(--neon); }
 #panel-body { margin-top: 12px; }
 .sign:disabled { opacity: .55; cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) { .checkout { animation: none; } }
+
+/* Kiez-Panel: Stammkunden */
+.regular { border-top: 3px dashed var(--paper-dark); padding-top: 8px; margin-top: 8px; }
+.regular-name { margin: 0; font-size: 22px; color: var(--neon-dark); }
+.regular-text, .regular-last { margin: 2px 0 0; font-size: 17px; line-height: 1.15; }
+.regular-last { color: var(--wood-dark); }
+.panel-paper { max-height: 60vh; overflow-y: auto; }
