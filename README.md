@@ -18,10 +18,14 @@ npm run build    # fertige Version in dist/
 - `src/main.ts`: Logik
 - `src/game/room.ts`: Späti-Innenraum (Wand, Boden, Möbel) zeichnen
 - `src/game/state.ts`: Spielstand mit Speichern
-- `src/game/config.ts`: alle Stellschrauben (Tempo, Preise, Geduld, Beliebtheit, Kundenandrang)
+- `src/game/config.ts`: Stellschrauben (Tempo, Geduld, Beliebtheit, Kundenandrang)
 - `src/game/customers.ts`: Kundentypen, Sprüche und Fragen; neue Sprüche hier eintragen
 - `src/game/regulars.ts`: Stammkunden mit ihren Geschichten über mehrere Tage
-- `src/game/sim.ts`: Uhr, Kunden, Schlange, Kassieren
+- `src/game/products.ts`: Waren mit Preisen und welche Kunden sie mögen
+- `src/game/upgrades.ts`: Tech-Tree (Kosten, Voraussetzungen, Wirkungen)
+- `src/game/goals.ts`: Tagesziele
+- `src/game/layout.ts`: wo Möbel stehen und wo Kunden hinlaufen
+- `src/game/sim.ts`: Uhr, Kunden, Schlange, Kassieren, Aushilfe
 - `src/ui/icons.ts`: Pixel-Icons als Platzhalter
 - `src/ui/style.css`: Aussehen
 - `drafts/`: geparkte Entwürfe, noch nicht eingebaut

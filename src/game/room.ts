@@ -8,19 +8,9 @@ import counterUrl from '../../assets/furn-counter.png';
 import shelfUrl from '../../assets/furn-snackshelf.png';
 import crateUrl from '../../assets/furn-crate.png';
 
-const FURNITURE = { fridge: fridgeUrl, counter: counterUrl, shelf: shelfUrl, crate: crateUrl };
-type FurnitureType = keyof typeof FURNITURE;
+import { furnitureLayout, FurnitureType } from './layout';
 
-// Ein Möbelstück im Raum: x = Mitte, y = Fußlinie in Pixeln unterhalb der Wandkante (0 = direkt an der Wand)
-interface Placed { type: FurnitureType; x: number; y: number }
-
-// Feste Startaufstellung; im Baumodus wird das später veränderbar
-const START_LAYOUT: Placed[] = [
-  { type: 'shelf', x: 110, y: 3 },
-  { type: 'fridge', x: 208, y: 3 },
-  { type: 'crate', x: 40, y: 40 },
-  { type: 'counter', x: 170, y: 110 },
-];
+const FURNITURE: Record<FurnitureType, string> = { fridge: fridgeUrl, counter: counterUrl, shelf: shelfUrl, crate: crateUrl };
 
 // Breite des Start-Spätis in Pixeln = genau ein Bildschirm. Upgrades machen den Raum später breiter,
 // die Vergrößerung richtet sich aber immer nach dieser Breite.
@@ -75,14 +65,14 @@ export interface Drawable { y: number; draw: (ctx: CanvasRenderingContext2D, wal
 export interface Room {
   background: HTMLCanvasElement; // Wand und Boden, einmal gezeichnet
   wallH: number;
-  furniture: Drawable[];
+  sprites: Record<FurnitureType, HTMLImageElement>;
 }
 
 // Lädt die Bilder und baut den Hintergrund; minHeight streckt den Boden bis zum unteren Bildschirmrand
-export async function buildRoom(minHeight = 0, layout: Placed[] = START_LAYOUT): Promise<Room> {
+export async function buildRoom(minHeight = 0): Promise<Room> {
   const [wall, floor] = await Promise.all([loadImage(wallUrl), loadImage(floorUrl)]);
-  const types = [...new Set(layout.map(p => p.type))];
-  const sprites = Object.fromEntries(await Promise.all(types.map(async t => [t, await loadImage(FURNITURE[t])] as const)));
+  const types = Object.keys(FURNITURE) as FurnitureType[];
+  const sprites = Object.fromEntries(await Promise.all(types.map(async t => [t, await loadImage(FURNITURE[t])] as const))) as Room['sprites'];
 
   const wallH = Math.round(wall.height * WALL_CROP);
   const background = document.createElement('canvas');
@@ -93,17 +83,7 @@ export async function buildRoom(minHeight = 0, layout: Placed[] = START_LAYOUT):
   ctx.drawImage(wall, 0, 0, wall.width, wallH, 0, 0, wall.width, wallH);
   drawFloor(ctx, floor, wallH, background.height - wallH);
   shadeBand(ctx, wallH, background.width, 10, 0.45);
-
-  const furniture = layout.map(p => ({
-    y: p.y,
-    draw: (c: CanvasRenderingContext2D, top: number) => {
-      const img = sprites[p.type];
-      const footY = top + p.y;
-      footShadow(c, p.x, footY - 1, img.width);
-      c.drawImage(img, Math.round(p.x - img.width / 2), footY - img.height);
-    },
-  }));
-  return { background, wallH, furniture };
+  return { background, wallH, sprites };
 }
 
 // Ein Bild der Szene: Hintergrund, dann Möbel und Kunden von hinten nach vorn
@@ -115,5 +95,14 @@ export function drawScene(canvas: HTMLCanvasElement, room: Room, people: Drawabl
   const ctx = canvas.getContext('2d')!;
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(room.background, 0, 0);
-  for (const d of [...room.furniture, ...people].sort((a, b) => a.y - b.y)) d.draw(ctx, room.wallH);
+  const furniture: Drawable[] = furnitureLayout().map(p => ({
+    y: p.y,
+    draw: (c, top) => {
+      const img = room.sprites[p.type];
+      const footY = top + p.y;
+      footShadow(c, p.x, footY - 1, img.width);
+      c.drawImage(img, Math.round(p.x - img.width / 2), footY - img.height);
+    },
+  }));
+  for (const d of [...furniture, ...people].sort((a, b) => a.y - b.y)) d.draw(ctx, room.wallH);
 }

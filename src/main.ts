@@ -1,13 +1,16 @@
 import './ui/style.css';
 import { buildRoom, drawScene, footShadow, Room, SCREEN_WIDTH } from './game/room';
 import { state, saveGame, resetGame, day, formatMoney, formatTime, formatRating } from './game/state';
-import { BEER, QUEUE, TIME } from './game/config';
+import { LOW_STOCK, QUEUE, TIME } from './game/config';
+import { PRODUCTS } from './game/products';
+import { BRANCHES, UPGRADES, blockedReason, buy, has, stockCap, unlockedProducts, HELPER_WAGE } from './game/upgrades';
+import { messages } from './game/goals';
 import { CUSTOMERS, drawPerson, Choice } from './game/customers';
 import * as sim from './game/sim';
 import { REGULARS } from './game/regulars';
 import { fillIcons } from './ui/icons';
 
-const VERSION = '0.5.0';
+const VERSION = '0.6.0';
 const $ = (id: string) => document.getElementById(id)!;
 
 // ---------- Bildschirme wechseln ----------
@@ -44,8 +47,19 @@ async function layoutRoom() {
 }
 window.addEventListener('resize', () => { if (!$('screen-play').hidden) layoutRoom(); });
 
+let offlineChecked = false;
 async function openShop() {
   await layoutRoom();
+  // Einmal pro Start: hat die Aushilfe verdient, während die App zu war?
+  if (!offlineChecked) {
+    offlineChecked = true;
+    const off = sim.offlineEarnings();
+    if (off && off.customers > 0) {
+      openPanel('offline');
+      $('panel-text').textContent = `Deine Aushilfe hat ${off.customers} Kunden bedient und ${formatMoney(off.revenue)} eingenommen (in ${off.hours.toLocaleString('de-DE', { maximumFractionDigits: 1 })} Stunden, höchstens 8). Lohn: ${formatMoney(HELPER_WAGE)} pro Spieltag.`;
+      saveGame();
+    }
+  }
   lastFrame = performance.now();
   requestAnimationFrame(frame);
 }
@@ -143,9 +157,10 @@ checkoutBtn.addEventListener('click', () => {
   talking = checkout;
   const kind = CUSTOMERS[checkout.customer.type];
   const regular = checkout.customer.regularId;
+  const product = PRODUCTS[checkout.customer.product];
   $('talk-name').textContent = regular
-    ? `${checkout.customer.name} · Stammkunde ${hearts(state.regulars[regular]?.friendship ?? 0)}`
-    : `${checkout.customer.name} · ${kind.label}`;
+    ? `${checkout.customer.name} · Stammkunde ${hearts(state.regulars[regular]?.friendship ?? 0)} · kauft ${product.name}`
+    : `${checkout.customer.name} · ${kind.label} · kauft ${product.name}`;
   $('talk-text').textContent = checkout.question?.text ?? checkout.line ?? '';
   const choices = $('talk-choices');
   choices.replaceChildren();
@@ -158,7 +173,7 @@ checkoutBtn.addEventListener('click', () => {
     choices.append(b);
   };
   if (checkout.question) checkout.question.choices.forEach(ch => addChoice(ch.label, ch));
-  else addChoice(`Kassieren · ${formatMoney(BEER.price)}`);
+  else addChoice(`Kassieren · ${formatMoney(product.price)}`);
   talk.hidden = false;
   (choices.firstElementChild as HTMLElement).focus();
 });
@@ -178,17 +193,47 @@ function renderHud() {
   setText('hud-time', `Tag ${day(state.minutes)} · ${formatTime(state.minutes)}`);
   setText('hud-speed', SPEED_LABEL[speedIndex]);
   setText('hud-rating', `${formatRating(state.rating)}/5`);
-  const warn = $('hud-stock');
-  warn.hidden = state.beer > BEER.lowStock;
-  setText('hud-stock-text', state.beer === 0 ? 'Bier alle!' : `Nur noch ${state.beer} Bier`);
+  // Warnung für die knappste Ware
+  const lowest = unlockedProducts().map(p => ({ p, n: state.stock[p] ?? 0 })).sort((a, b) => a.n - b.n)[0];
+  $('hud-stock').hidden = lowest.n > LOW_STOCK;
+  setText('hud-stock-text', lowest.n === 0 ? `${PRODUCTS[lowest.p].name} alle!` : `Nur noch ${lowest.n} ${PRODUCTS[lowest.p].name}`);
+  setText('btn-goals', `Ziele ${state.goals.filter(g => g.done).length}/${state.goals.length}`);
+  showToasts();
 }
+
+// ---------- Meldungen (Ziel geschafft, Tagesbilanz …) ----------
+const toast = $('toast');
+let toastUntil = 0;
+function showToasts() {
+  const now = performance.now();
+  if (now < toastUntil) return;
+  const next = messages.shift();
+  toast.hidden = !next;
+  if (next) { toast.textContent = next; toastUntil = now + 3500; }
+}
+
+const el = (tag: string, className: string, text = '') => {
+  const e = document.createElement(tag);
+  e.className = className;
+  e.textContent = text;
+  return e;
+};
+const signButton = (label: string, onClick: () => void, disabled = false) => {
+  const b = el('button', 'sign sign-wide', label) as HTMLButtonElement;
+  b.type = 'button';
+  b.disabled = disabled;
+  b.addEventListener('click', onClick);
+  return b;
+};
 
 // ---------- Buttons unten: öffnen je ein Panel ----------
 const PANELS: Record<string, { title: string; text: string }> = {
   lager: { title: 'Lager', text: '' },
-  preise: { title: 'Preise', text: `Bier kostet bei dir ${formatMoney(BEER.price)}. Preise selbst festlegen kommt in einem späteren Schritt.` },
-  bauen: { title: 'Bauen', text: 'Hier kaufst und platzierst du Möbel und vergrößerst später den Laden. Kommt in einem späteren Schritt.' },
+  preise: { title: 'Preise', text: '' },
+  bauen: { title: 'Bauen', text: 'Gib dein Geld aus: neue Waren, mehr Platz, besserer Service.' },
   kiez: { title: 'Kiez', text: '' },
+  ziele: { title: 'Tagesziele', text: 'Jeden Morgen gibt es neue Aufgaben. Geschafft ist geschafft, auch wenn du die App schließt.' },
+  offline: { title: 'Während du weg warst', text: '' },
 };
 const panel = $('panel');
 function openPanel(key: string) {
@@ -197,32 +242,80 @@ function openPanel(key: string) {
   $('panel-body').replaceChildren();
   if (key === 'lager') renderLager();
   if (key === 'kiez') renderKiez();
+  if (key === 'bauen') renderBauen();
+  if (key === 'preise') renderPreise();
+  if (key === 'ziele') renderZiele();
   panel.hidden = false;
   $('panel-close').focus();
 }
 const closePanel = () => { panel.hidden = true; };
 document.querySelectorAll<HTMLElement>('[data-panel]').forEach(b => b.addEventListener('click', () => openPanel(b.dataset.panel!)));
+$('btn-goals').addEventListener('click', () => openPanel('ziele'));
 $('panel-close').addEventListener('click', closePanel);
 panel.addEventListener('click', e => { if (e.target === panel) closePanel(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
 
-// Lager: Bestand und Nachbestellen
+// Lager: Bestand und Nachbestellen für jede freigeschaltete Ware
 function renderLager() {
-  const cost = BEER.orderAmount * BEER.buyPrice;
-  $('panel-text').textContent = `Bier: ${state.beer} Flaschen im Lager.`;
-  const order = document.createElement('button');
-  order.type = 'button';
-  order.className = 'sign sign-wide';
-  order.textContent = `+${BEER.orderAmount} Bier bestellen · ${formatMoney(cost)}`;
-  order.disabled = state.money < cost;
-  const note = document.createElement('p');
-  note.className = 'panel-note';
-  note.textContent = order.disabled ? 'Dafür reicht dein Geld gerade nicht.' : 'Neue Waren schaltest du später frei.';
-  order.addEventListener('click', () => {
-    if (sim.orderBeer()) { saveGame(); renderLager(); }
-  });
-  $('panel-body').replaceChildren(order, note);
+  $('panel-text').textContent = `Platz pro Ware: ${stockCap()} Stück.`;
+  $('panel-body').replaceChildren(...unlockedProducts().map(id => {
+    const p = PRODUCTS[id];
+    const amount = sim.orderAmount(id);
+    const cost = amount * p.buyPrice;
+    const row = el('div', 'item');
+    row.append(el('p', 'item-name', `${p.name}: ${state.stock[id] ?? 0} ${p.plural}`));
+    row.append(amount
+      ? signButton(`+${amount} bestellen · ${formatMoney(cost)}`, () => { if (sim.order(id)) { saveGame(); renderLager(); } }, state.money < cost)
+      : el('p', 'item-note', 'Lager voll.'));
+    return row;
+  }));
 }
+
+// Preise: vorerst nur ansehen, selbst festlegen kommt im nächsten Schritt
+function renderPreise() {
+  $('panel-text').textContent = 'Preise selbst festlegen kommt im nächsten Schritt.';
+  $('panel-body').replaceChildren(...unlockedProducts().map(id =>
+    el('p', 'item-name', `${PRODUCTS[id].name}: ${formatMoney(PRODUCTS[id].price)} (Einkauf ${formatMoney(PRODUCTS[id].buyPrice)})`)));
+}
+
+// Bauen: der Tech-Tree in drei Zweigen
+function renderBauen() {
+  const parts: HTMLElement[] = [];
+  for (const branch of BRANCHES) {
+    parts.push(el('h4', 'branch', branch.name));
+    for (const u of UPGRADES.filter(x => x.branch === branch.id)) {
+      const reason = blockedReason(u);
+      const row = el('div', has(u.id) ? 'item item-done' : 'item');
+      row.append(el('p', 'item-name', has(u.id) ? `✓ ${u.name}` : `${u.name} · ${formatMoney(u.cost)}`));
+      row.append(el('p', 'item-note', u.desc));
+      if (!has(u.id)) {
+        row.append(reason && reason !== 'Zu wenig Geld'
+          ? el('p', 'item-lock', reason)
+          : signButton('Kaufen', () => {
+            if (!buy(u)) return;
+            messages.push(u.product ? `${u.name} ist ab jetzt im Sortiment! Denk ans Nachbestellen.` : `${u.name} gekauft!`);
+            if (u.product) sim.order(u.product);
+            saveGame();
+            renderBauen();
+          }, reason === 'Zu wenig Geld'));
+      }
+      parts.push(row);
+    }
+  }
+  $('panel-body').replaceChildren(...parts);
+}
+
+// Tagesziele mit Fortschritt
+function renderZiele() {
+  $('panel-body').replaceChildren(...state.goals.map(g => {
+    const row = el('div', g.done ? 'item item-done' : 'item');
+    row.append(el('p', 'item-name', `${g.done ? '✓ ' : ''}${g.text}`));
+    const reward = [g.reward.money && `+${formatMoney(g.reward.money)}`, g.reward.rating && 'mehr Beliebtheit'].filter(Boolean).join(', ');
+    row.append(el('p', 'item-note', g.atDayEnd ? `Wird um Mitternacht geprüft · ${reward}` : `${Math.min(g.progress, g.target)} / ${g.target} · ${reward}`));
+    return row;
+  }));
+}
+
 // Kiez: Stammkunden, die du schon kennst
 function renderKiez() {
   const known = REGULARS.filter(r => state.regulars[r.id]);
@@ -293,4 +386,6 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator) {
 }
 
 // Nur im Entwicklungsmodus: Zugriff für automatische Tests (spult z. B. Spieltage im Schnelldurchlauf vor)
-if (import.meta.env.DEV) Object.assign(window, { kiez: { state, sim } });
+if (import.meta.env.DEV) {
+  import('./game/upgrades').then(up => Object.assign(window, { kiez: { state, sim, up, products: PRODUCTS } }));
+}

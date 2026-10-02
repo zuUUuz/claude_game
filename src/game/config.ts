@@ -6,14 +6,9 @@ export const TIME = {
   startMinutes: 8 * 60, // Spielstart: Tag 1, 8 Uhr
 };
 
-export const BEER = {
-  name: 'Bier',
-  price: 1.5,       // Verkaufspreis
-  buyPrice: 0.6,    // Einkaufspreis pro Flasche
-  orderAmount: 10,  // Flaschen pro Bestellung
-  startStock: 24,
-  lowStock: 5,      // ab hier warnt das Schild oben
-};
+// Preise, Einkaufspreise und Bestellmengen der Waren stehen in products.ts, Upgrades in upgrades.ts
+export const START_STOCK = 24; // Bier zum Start
+export const LOW_STOCK = 5;    // ab hier warnt das Schild oben
 
 export const START_MONEY = 50;
 
@@ -24,7 +19,7 @@ export const QUEUE = {
 
 export const RATING = {
   start: 2.5,
-  served: 0.03,     // pro bedientem Kunden
+  served: 0.01,     // pro bedientem Kunden
   gaveUp: -0.15,    // Kunde ist aus der Schlange gegangen
   noBeer: -0.1,     // Kunde wollte Bier, aber es war alle
   queueFull: -0.02, // Kunde kam rein, Schlange voll

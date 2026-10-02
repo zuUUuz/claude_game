@@ -156,3 +156,28 @@ h2 { margin: 0; font-weight: 400; font-size: 38px; color: var(--neon); }
 .regular-text, .regular-last { margin: 2px 0 0; font-size: 17px; line-height: 1.15; }
 .regular-last { color: var(--wood-dark); }
 .panel-paper { max-height: 60vh; overflow-y: auto; }
+
+/* Tagesziele-Zettel oben rechts */
+.goals-tag {
+  position: absolute; right: 12px; top: 10px; font: 400 18px var(--font); color: var(--ink);
+  background: var(--paper); border: 3px solid var(--wood-edge); padding: 3px 10px;
+  box-shadow: 2px 2px 0 var(--wood-edge); transform: rotate(2deg); cursor: pointer;
+}
+.goals-tag:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+/* Meldungen: Ziel geschafft, Tagesbilanz */
+.toast {
+  position: absolute; left: 50%; top: 56px; transform: translateX(-50%); width: min(340px, calc(100% - 24px)); margin: 0;
+  background: var(--neon); color: #2a0717; border: 3px solid var(--wood-edge); padding: 8px 12px;
+  font-size: 19px; line-height: 1.15; text-align: center; box-shadow: 3px 3px 0 var(--wood-edge);
+}
+
+/* Listen in Panels: Lager, Bauen, Ziele */
+.item { border-top: 3px dashed var(--paper-dark); padding-top: 8px; margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+.item-name { margin: 0; font-size: 21px; }
+.item-note { margin: 0; font-size: 17px; line-height: 1.15; color: var(--wood-dark); }
+.item-lock { margin: 0; font-size: 17px; color: var(--warn); }
+.item-done .item-name { color: #3f8f4a; }
+.item .sign-wide { padding: 6px; font-size: 19px; }
+.branch { margin: 14px 0 0; font-weight: 400; font-size: 26px; color: var(--neon-dark); }
+.branch:first-child { margin-top: 0; }

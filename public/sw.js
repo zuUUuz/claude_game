@@ -1,6 +1,6 @@
 // Offline-Speicher für die Web-App: zeigt sofort die gespeicherte Version und holt im Hintergrund
 // die neue. Ein Update ist damit beim nächsten Start der App da.
-const CACHE = 'kiezkoenig-v3';
+const CACHE = 'kiezkoenig-v4';
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', event => {
