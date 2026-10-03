@@ -1,6 +1,6 @@
 # Kiezkönig
 
-Ein Späti-Spiel fürs Handy mit simpler Pixel-Grafik. Wird Schritt für Schritt aufgebaut.
+Ein Späti-Spiel fürs Handy mit simpler Pixel-Grafik.
 
 **Spielen:** https://zuuuuz.github.io/claude_game/ (auf dem iPhone in Safari öffnen → Teilen → „Zum Home-Bildschirm“)
 
@@ -32,8 +32,6 @@ npm run build    # fertige Version in dist/
 - `capacitor.config.ts`: Grundlage für die spätere Android- und iOS-App (Bundle-ID `de.kiezkoenig.app`)
 - `public/`: Web-App-Dateien (Manifest, Offline-Speicher, Icons; Icons mit `npm run icons`)
 - `.github/workflows/pages.yml`: veröffentlicht jede Version automatisch auf GitHub Pages
-
-Der Plan steht in der [ROADMAP.md](ROADMAP.md).
 
 ## Grafik generieren
 
